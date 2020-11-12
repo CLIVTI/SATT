@@ -1,0 +1,95 @@
+2020-11-12T16:15:20,033  WARN PlanCalcScoreConfigGroup$ScoringParameterSet:1536 marginal utl of wait set to: -5.0. Setting this different from zero is discouraged since there is already the marginal utility of time as a resource. The parameter was also used in the past for pt routing; if you did that, consider setting the new parameter waitingPt instead.
+2020-11-12T16:15:20,057  WARN PrepareForSimImpl:222 'usePersonIdForMissingVehicleId' is deprecated. It will be removed soon.
+2020-11-12T16:15:20,174  WARN RandomizingTimeDistanceTravelDisutilityFactory:112 There will be no routing randomness. The randomization of the travel disutility requires the monetary distance rate to be different than zero. Continuing anyway.
+2020-11-12T16:15:20,175  WARN RandomizingTimeDistanceTravelDisutilityFactory:117 There will be no routing randomness. The randomization of the travel disutility requires the travel time cost rate to be different than zero. Continuing anyway.
+2020-11-12T16:15:20,292  WARN ObjectAttributesConverter:77 No AttributeConverter found for class java.util.Collections$UnmodifiableMap. Not all attribute values can be converted.
+2020-11-12T16:15:20,825 ERROR BasicPlanAgentImpl:184 last activity of person driver agent id P1 has end time < infty; setting it to infty
+2020-11-12T16:15:20,828 ERROR BasicPlanAgentImpl:185  This message given only once.
+2020-11-12T16:15:22,799  WARN TimeAllocationMutatorModule:127 Please be aware that durations of activities now can mutate freely and possibly become negative.This might be a problem if you have 
+a) short activities that are only provided with duration and not with endtime  AND
+b) agents with only one or two initial plans.
+This can have impact on scoring and maybe even on qsim execution. It is recommended to set affectingDuration=false for such set up.
+2020-11-12T16:15:22,801  WARN ExpBetaPlanChanger:86 Would make sense to revise this once more.  See comments in code.  kai, nov08
+2020-11-12T16:15:22,881  WARN ObjectAttributesConverter:77 No AttributeConverter found for class java.util.Collections$UnmodifiableMap. Not all attribute values can be converted.
+2020-11-12T16:15:22,948 ERROR AbstractController:209 Mobsim did not complete normally! afterMobsimListeners will be called anyway.
+java.lang.RuntimeException: Expected number of change events (5) differs from the number of events found (4)!
+	at org.matsim.core.network.VariableIntervalTimeVariantAttribute.recalc(VariableIntervalTimeVariantAttribute.java:93) ~[matsim-12.0.jar:?]
+	at org.matsim.core.network.TimeVariantLinkImpl.recalcFlowCapacity(TimeVariantLinkImpl.java:180) ~[matsim-12.0.jar:?]
+	at org.matsim.core.network.TimeVariantLinkImpl.getFlowCapacityPerSec(TimeVariantLinkImpl.java:153) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.qnetsimengine.QLinkImpl.recalcTimeVariantAttributes(QLinkImpl.java:185) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsEngine.applyTheChangeEvent(NetworkChangeEventsEngine.java:79) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsEngine$1.handleMessage(NetworkChangeEventsEngine.java:68) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.jdeqsimengine.SteppableScheduler.doSimStep(SteppableScheduler.java:52) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.messagequeueengine.MessageQueueEngine.notifyMobsimBeforeSimStep(MessageQueueEngine.java:41) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.MobsimListenerManager.fireQueueSimulationBeforeSimStepEvent(MobsimListenerManager.java:106) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.QSim.doSimStep(QSim.java:387) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.QSim.run(QSim.java:267) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.NewControler.runMobSim(NewControler.java:124) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController$8.run(AbstractController.java:198) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.iterationStep(AbstractController.java:230) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.mobsim(AbstractController.java:194) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.iteration(AbstractController.java:145) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.doIterations(AbstractController.java:113) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController$1.run(AbstractController.java:80) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.MatsimRuntimeModifications.run(MatsimRuntimeModifications.java:69) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.MatsimRuntimeModifications.run(MatsimRuntimeModifications.java:52) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.run(AbstractController.java:88) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.NewControler.run(NewControler.java:82) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.Controler.run(Controler.java:249) [matsim-12.0.jar:?]
+	at unitTest.runTestScenario.main(runTestScenario.java:59) [classes/:?]
+2020-11-12T16:15:22,992 ERROR MatsimRuntimeModifications:75 Getting uncaught Exception in Thread main
+java.lang.RuntimeException: Expected number of change events (5) differs from the number of events found (4)!
+	at org.matsim.core.network.VariableIntervalTimeVariantAttribute.recalc(VariableIntervalTimeVariantAttribute.java:93) ~[matsim-12.0.jar:?]
+	at org.matsim.core.network.TimeVariantLinkImpl.recalcFlowCapacity(TimeVariantLinkImpl.java:180) ~[matsim-12.0.jar:?]
+	at org.matsim.core.network.TimeVariantLinkImpl.getFlowCapacityPerSec(TimeVariantLinkImpl.java:153) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.qnetsimengine.QLinkImpl.recalcTimeVariantAttributes(QLinkImpl.java:185) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsEngine.applyTheChangeEvent(NetworkChangeEventsEngine.java:79) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsEngine$1.handleMessage(NetworkChangeEventsEngine.java:68) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.jdeqsimengine.SteppableScheduler.doSimStep(SteppableScheduler.java:52) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.messagequeueengine.MessageQueueEngine.notifyMobsimBeforeSimStep(MessageQueueEngine.java:41) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.MobsimListenerManager.fireQueueSimulationBeforeSimStepEvent(MobsimListenerManager.java:106) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.QSim.doSimStep(QSim.java:387) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.QSim.run(QSim.java:267) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.NewControler.runMobSim(NewControler.java:124) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController$8.run(AbstractController.java:198) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.iterationStep(AbstractController.java:230) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.mobsim(AbstractController.java:194) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.iteration(AbstractController.java:145) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.doIterations(AbstractController.java:113) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController$1.run(AbstractController.java:80) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.MatsimRuntimeModifications.run(MatsimRuntimeModifications.java:69) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.MatsimRuntimeModifications.run(MatsimRuntimeModifications.java:52) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.run(AbstractController.java:88) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.NewControler.run(NewControler.java:82) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.Controler.run(Controler.java:249) [matsim-12.0.jar:?]
+	at unitTest.runTestScenario.main(runTestScenario.java:59) [classes/:?]
+2020-11-12T16:15:22,994 ERROR MatsimRuntimeModifications:81 ERROR --- This is an unexpected shutdown!
+2020-11-12T16:15:22,994 ERROR MatsimRuntimeModifications:84 Shutdown possibly caused by the following Exception:
+java.lang.RuntimeException: Expected number of change events (5) differs from the number of events found (4)!
+	at org.matsim.core.network.VariableIntervalTimeVariantAttribute.recalc(VariableIntervalTimeVariantAttribute.java:93) ~[matsim-12.0.jar:?]
+	at org.matsim.core.network.TimeVariantLinkImpl.recalcFlowCapacity(TimeVariantLinkImpl.java:180) ~[matsim-12.0.jar:?]
+	at org.matsim.core.network.TimeVariantLinkImpl.getFlowCapacityPerSec(TimeVariantLinkImpl.java:153) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.qnetsimengine.QLinkImpl.recalcTimeVariantAttributes(QLinkImpl.java:185) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsEngine.applyTheChangeEvent(NetworkChangeEventsEngine.java:79) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsEngine$1.handleMessage(NetworkChangeEventsEngine.java:68) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.jdeqsimengine.SteppableScheduler.doSimStep(SteppableScheduler.java:52) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.messagequeueengine.MessageQueueEngine.notifyMobsimBeforeSimStep(MessageQueueEngine.java:41) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.MobsimListenerManager.fireQueueSimulationBeforeSimStepEvent(MobsimListenerManager.java:106) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.QSim.doSimStep(QSim.java:387) ~[matsim-12.0.jar:?]
+	at org.matsim.core.mobsim.qsim.QSim.run(QSim.java:267) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.NewControler.runMobSim(NewControler.java:124) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController$8.run(AbstractController.java:198) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.iterationStep(AbstractController.java:230) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.mobsim(AbstractController.java:194) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.iteration(AbstractController.java:145) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.doIterations(AbstractController.java:113) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController$1.run(AbstractController.java:80) ~[matsim-12.0.jar:?]
+	at org.matsim.core.controler.MatsimRuntimeModifications.run(MatsimRuntimeModifications.java:69) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.MatsimRuntimeModifications.run(MatsimRuntimeModifications.java:52) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.AbstractController.run(AbstractController.java:88) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.NewControler.run(NewControler.java:82) [matsim-12.0.jar:?]
+	at org.matsim.core.controler.Controler.run(Controler.java:249) [matsim-12.0.jar:?]
+	at unitTest.runTestScenario.main(runTestScenario.java:59) [classes/:?]
+2020-11-12T16:15:23,564 ERROR MatsimRuntimeModifications:99 ERROR --- MATSim unexpectedly terminated. Please check the output or the logfile with warnings and errors for hints.
+2020-11-12T16:15:23,565 ERROR MatsimRuntimeModifications:100 ERROR --- results should not be used for further analysis.
+2020-11-12T16:15:23,565 ERROR MatsimRuntimeModifications:104 ERROR --- This was an unexpected shutdown! See the log file for a possible reason.
