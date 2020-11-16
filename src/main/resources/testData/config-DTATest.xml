@@ -36,7 +36,7 @@
 	<module name="controler">
 		<param name="outputDirectory" value="./output_singleTrack" />
 		<param name="firstIteration" value="0" />
-		<param name="lastIteration" value="1" />
+		<param name="lastIteration" value="0" />
 		<param name="eventsFileFormat" value="xml" />
 	</module>
 
@@ -50,9 +50,9 @@
 
 		<parameterset type="scoringParameters">
 			<param name="lateArrival" value="-18" />
-			<param name="earlyDeparture" value="-0" />
+			<param name="earlyDeparture" value="-10" />
 			<param name="performing" value="+6" />
-			<param name="waiting" value="-5" />
+			<param name="waiting" value="-0" />
 
 			<parameterset type="modeParams">
 				<param name="mode" value="car"/>

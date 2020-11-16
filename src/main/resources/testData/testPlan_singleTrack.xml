@@ -21,27 +21,13 @@
 
 <!-- ====================================================================== -->
 
-	<person id="P2">
-		<plan selected="yes">
-			<activity type="home" link="l_1_AB" end_time="08:00:10" >
-			</activity>
-			<leg mode="car">
-			</leg>
-			<activity type="home" link="l_3_AB" end_time="21:00:00" >
-			</activity>
-		</plan>
-
-	</person>
-
-<!-- ====================================================================== -->
-
 	<person id="P3">
 		<plan selected="yes">
 			<activity type="home" link="l_3_BA" end_time="08:00:05" >
 			</activity>
 			<leg mode="car">
 			</leg>
-			<activity type="home" link="l_1_BA" >
+			<activity type="home" link="l_1_BA" end_time="21:00:00" >
 			</activity>
 		</plan>
 

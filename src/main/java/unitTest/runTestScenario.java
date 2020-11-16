@@ -7,8 +7,8 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
+import eventsHandling.SingleTrackListener;
 
-import eventsHandling.SingleTrackLinkEventHandler;
 
 public class runTestScenario {
 
@@ -51,12 +51,15 @@ public class runTestScenario {
 		// add the events handlers
 		Controler controler = new Controler( scenario ) ;
 		controler.addOverridingModule(new AbstractModule(){
-			@Override public void install() {
-				this.addEventHandlerBinding().toInstance( new SingleTrackLinkEventHandler( scenario.getNetwork() )  );
+			@Override public void install() {			
+				bind(SingleTrackListener.class).asEagerSingleton();
+				addMobsimListenerBinding().to(SingleTrackListener.class);
+				addEventHandlerBinding().to(SingleTrackListener.class);
 			}
 		});
 		
 		controler.run() ;
+		
 	}
 
 }

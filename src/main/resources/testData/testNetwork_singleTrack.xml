@@ -9,7 +9,11 @@
 		</node>
 		<node id="n_2" x="1000.0" y="0.0" >
 		</node>
+		<node id="n_2_q" x="1001.0" y="0.0" >
+		</node>
 		<node id="n_3" x="2000.0" y="0.0" >
+		</node>
+		<node id="n_3_q" x="1999.0" y="0.0" >
 		</node>
 		<node id="n_4" x="3000.0" y="0.0" >
 		</node>
@@ -19,16 +23,44 @@
 
 	<links capperiod="01:00:00" effectivecellsize="7.5" effectivelanewidth="3.75">
 		<link id="l_1_AB" from="n_1" to="n_2" length="1000.0" freespeed="25.0" capacity="20.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
 		</link>
 		<link id="l_1_BA" from="n_2" to="n_1" length="1000.0" freespeed="25.0" capacity="20.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
 		</link>
-		<link id="l_2_AB" from="n_2" to="n_3" length="1000.0" freespeed="25.0" capacity="20.0" permlanes="1.0" oneway="1" modes="car" >
+		<link id="l_2_AB" from="n_2_q" to="n_3" length="999.0" freespeed="25.0" capacity="20.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
 		</link>
-		<link id="l_2_BA" from="n_3" to="n_2" length="1000.0" freespeed="25.0" capacity="20.0" permlanes="1.0" oneway="1" modes="car" >
+		<link id="l_2_BA" from="n_3_q" to="n_2" length="999.0" freespeed="25.0" capacity="20.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
 		</link>
 		<link id="l_3_AB" from="n_3" to="n_4" length="1000.0" freespeed="25.0" capacity="20.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
 		</link>
 		<link id="l_3_BA" from="n_4" to="n_3" length="1000.0" freespeed="25.0" capacity="20.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+		<link id="q_l_2_AB" from="n_2" to="n_2_q" length="1.0" freespeed="25.0" capacity="20.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="SingleTrack" class="java.lang.Integer">1</attribute>
+			</attributes>
+		</link>
+		<link id="q_l_2_BA" from="n_3" to="n_3_q" length="1.0" freespeed="25.0" capacity="20.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="SingleTrack" class="java.lang.Integer">1</attribute>
+			</attributes>
 		</link>
 	</links>
 
