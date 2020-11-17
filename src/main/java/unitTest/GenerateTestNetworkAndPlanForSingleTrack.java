@@ -40,7 +40,7 @@ public class GenerateTestNetworkAndPlanForSingleTrack {
 		String inputDataPath = System.getProperty("user.dir")+"\\src\\main\\resources\\testData\\";
 		inputDataPath = inputDataPath.replaceAll("\\\\", "/");
 		String outputNetworkFile = inputDataPath+"testNetwork_singleTrack.xml";
-		String outputPlanFile = inputDataPath+"testPlan_singleTrack.xml";
+		String outputPlanFile = inputDataPath+"testPlan_complicatedSingleTrack.xml";
 		
 		
 		GenerateTestNetworkAndPlanForSingleTrack test = new GenerateTestNetworkAndPlanForSingleTrack();
@@ -61,9 +61,9 @@ public class GenerateTestNetworkAndPlanForSingleTrack {
 		// add some nodes
 		Node node1 = fac.createNode(Id.createNodeId("n_1"), new Coord(0, 0));
 		Node node2 = fac.createNode(Id.createNodeId("n_2"), new Coord(1000, 0));
-		Node node2q = fac.createNode(Id.createNodeId("n_2_q"), new Coord(1001, 0));
+		Node node2q = fac.createNode(Id.createNodeId("n_2_q"), new Coord(1050, 0));
 		Node node3 = fac.createNode(Id.createNodeId("n_3"), new Coord(2000, 0));
-		Node node3q = fac.createNode(Id.createNodeId("n_3_q"), new Coord(1999, 0));
+		Node node3q = fac.createNode(Id.createNodeId("n_3_q"), new Coord(1950, 0));
 		Node node4 = fac.createNode(Id.createNodeId("n_4"), new Coord(3000, 0));
 
 		matsimNetwork.addNode(node1);
@@ -93,8 +93,10 @@ public class GenerateTestNetworkAndPlanForSingleTrack {
 				eachLink.getAttributes().putAttribute("SingleTrack", 0);
 			}
 			eachLink.setAllowedModes(allowedModes);
-			eachLink.setCapacity(20);
+			eachLink.setCapacity(10000000);
 			eachLink.setFreespeed(90/3.6);
+			
+			
 			matsimNetwork.addLink(eachLink);
 		}
 
@@ -104,60 +106,51 @@ public class GenerateTestNetworkAndPlanForSingleTrack {
 		// create plan
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		Population population = scenario.getPopulation();
-		Person person1 = population.getFactory().createPerson(Id.createPersonId("P1"));
-		Plan plan = population.getFactory().createPlan();
+		int numberOfTrips=5;
 
-		// first add a person-trip from node1 to node4
-		Activity home = population.getFactory().createActivityFromLinkId("home", links.get(0).getId());
-		home.setEndTime(8*60*60);
-		plan.addActivity(home);
-
-		Leg hinweg = population.getFactory().createLeg(TransportMode.car);
-		plan.addLeg(hinweg);
-
-		Activity work = population.getFactory().createActivityFromLinkId("home", links.get(6).getId());
-		work.setEndTime(21*60*60);
-		plan.addActivity(work);
-		person1.addPlan(plan);
-		population.addPerson(person1);
-
-//		// second add a person-trip from node1 to node4 but 10 sec departure time shift
-//		Person person2 = population.getFactory().createPerson(Id.createPersonId("P2"));
-//		Plan plan2 = population.getFactory().createPlan();
-//		// first add a person-trip from node1 to node8
-//		Activity home2 = population.getFactory().createActivityFromLinkId("home", links.get(0).getId());
-//		home2.setEndTime(8*60*60+10);
-//		plan2.addActivity(home2);
-//
-//		Leg hinweg2 = population.getFactory().createLeg(TransportMode.car);
-//		plan2.addLeg(hinweg2);
-//
-//		Activity work2 = population.getFactory().createActivityFromLinkId("home", links.get(4).getId());
-//		work2.setEndTime(21*60*60);
-//		plan2.addActivity(work2);
-//		person2.addPlan(plan2);
-//		population.addPerson(person2);
-//		
+		for (int np=1;np<=numberOfTrips;np++) {
+			Person person = population.getFactory().createPerson(Id.createPersonId("P_AB_"+np));
+			Plan plan = population.getFactory().createPlan();
+			Activity home = population.getFactory().createActivityFromLinkId("home", links.get(0).getId());
+			
+			if (np==2) {
+				home.setEndTime(8*60*60+7);
+			} else {
+				home.setEndTime(8*60*60+(np-1)*20);
+			}
+			
+			
+			plan.addActivity(home);
+			
+			Leg hinweg = population.getFactory().createLeg(TransportMode.car);
+			plan.addLeg(hinweg);
+			
+			Activity work = population.getFactory().createActivityFromLinkId("home", links.get(6).getId());
+			work.setEndTime(21*60*60);
+			plan.addActivity(work);
+			person.addPlan(plan);
+			population.addPerson(person);
+		}
 		
-		
-		// third add a person-trip from node1 to node4 but 10 sec departure time shift
-				Person person3 = population.getFactory().createPerson(Id.createPersonId("P3"));
-				Plan plan3 = population.getFactory().createPlan();
-				// first add a person-trip from node1 to node8
-				Activity home3 = population.getFactory().createActivityFromLinkId("home", links.get(7).getId());
-				home3.setEndTime(8*60*60+5);
-				plan3.addActivity(home3);
+		for (int np=1;np<=numberOfTrips;np++) {
+			Person person = population.getFactory().createPerson(Id.createPersonId("P_BA_"+np));
+			Plan plan = population.getFactory().createPlan();
+			Activity home = population.getFactory().createActivityFromLinkId("home", links.get(7).getId());
+			home.setEndTime(8*60*60+10+(np-1)*20);
+			plan.addActivity(home);
+			
+			Leg hinweg = population.getFactory().createLeg(TransportMode.car);
+			plan.addLeg(hinweg);
+			
+			Activity work = population.getFactory().createActivityFromLinkId("home", links.get(1).getId());
+			work.setEndTime(21*60*60);
+			plan.addActivity(work);
+			person.addPlan(plan);
+			population.addPerson(person);
+		}
 
-				Leg hinweg3 = population.getFactory().createLeg(TransportMode.car);
-				plan3.addLeg(hinweg3);
-
-				Activity work3 = population.getFactory().createActivityFromLinkId("home", links.get(1).getId());
-				work3.setEndTime(21*60*60);
-				plan3.addActivity(work3);
-				person3.addPlan(plan3);
-				population.addPerson(person3);
-		
 		PopulationWriter popwriter = new PopulationWriter(population, matsimNetwork);
 		popwriter.write(outputPlanFile);
 	}
+
 }

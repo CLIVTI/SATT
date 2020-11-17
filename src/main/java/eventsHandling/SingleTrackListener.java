@@ -33,7 +33,7 @@ import org.matsim.core.network.NetworkChangeEvent.ChangeType;
 import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
 
 public class SingleTrackListener implements MobsimInitializedListener, MobsimBeforeSimStepListener,BasicEventHandler {
-	
+
 
 	private PriorityQueue<NetworkChangeEvent> networkChangeEventQueue = new PriorityQueue<NetworkChangeEvent>(1, new Comparator<NetworkChangeEvent>() {
 
@@ -45,9 +45,8 @@ public class SingleTrackListener implements MobsimInitializedListener, MobsimBef
 		}
 
 	});
-	private HashMap<String,Integer> nTrainsOnLinkAtAnyGivenTime = new  HashMap<String,Integer>();
-	private HashMap<String,Integer> nTrainsWaitAtLinkAtAnyGivenTime = new  HashMap<String,Integer>();
-
+	private HashMap<String,Integer> nTrainsEnterLinkAtAnyGivenTime = new  HashMap<String,Integer>();
+	private HashMap<String,Integer> nTrainsWaitLinkAtAnyGivenTime = new  HashMap<String,Integer>();
 
 
 	@Inject Scenario scenario;
@@ -56,13 +55,13 @@ public class SingleTrackListener implements MobsimInitializedListener, MobsimBef
 	public void notifyMobsimInitialized(MobsimInitializedEvent e) {
 		// TODO Auto-generated method stub
 		Map<Id<Link>, ? extends Link> allLinks = scenario.getNetwork().getLinks();
-       for (Entry<Id<Link>, ? extends Link> eachLink :allLinks.entrySet()) {
-    	   Integer singleTrackDummy = (Integer) eachLink.getValue().getAttributes().getAttribute("SingleTrack");
-    	   if (singleTrackDummy==1) {
-    		   nTrainsOnLinkAtAnyGivenTime.put(eachLink.getKey().toString(), 0);
-    		   nTrainsWaitAtLinkAtAnyGivenTime.put(eachLink.getKey().toString(), 0);
-    	   }
-       }
+		for (Entry<Id<Link>, ? extends Link> eachLink :allLinks.entrySet()) {
+			Integer singleTrackDummy = (Integer) eachLink.getValue().getAttributes().getAttribute("SingleTrack");
+			if (singleTrackDummy==1) {
+				nTrainsEnterLinkAtAnyGivenTime.put(eachLink.getKey().toString(), 0);
+				nTrainsWaitLinkAtAnyGivenTime.put(eachLink.getKey().toString(), 0);
+			}
+		}
 	}
 
 	@Override
@@ -71,25 +70,25 @@ public class SingleTrackListener implements MobsimInitializedListener, MobsimBef
 		double now = e.getSimulationTime();
 		QSim qSim=(QSim) e.getQueueSimulation();
 		ArrayList<NetworkChangeEvent> networkChangeEventToProcess = new ArrayList<NetworkChangeEvent>();
-		
-	    double initialTime=-10;
-	    while (initialTime<=now & networkChangeEventQueue.size()>0) {
-	    	NetworkChangeEvent oneNetworkChangeEvent = networkChangeEventQueue.poll();
-	    	if (oneNetworkChangeEvent!=null) {
-	    		initialTime=oneNetworkChangeEvent.getStartTime();
-	    		if (initialTime<=now){
-	    			networkChangeEventToProcess.add(oneNetworkChangeEvent);
-	    		}
-			}
-	    }
-	    
-	    for (int i=0; i<networkChangeEventToProcess.size();i++) {
-	    	qSim.addNetworkChangeEvent(networkChangeEventToProcess.get(i));
-	    	
-	    }
 
-		
-		
+		double initialTime=-10;
+		while (initialTime<=now & networkChangeEventQueue.size()>0) {
+			NetworkChangeEvent oneNetworkChangeEvent = networkChangeEventQueue.poll();
+			if (oneNetworkChangeEvent!=null) {
+				initialTime=oneNetworkChangeEvent.getStartTime();
+				if (initialTime<=now){
+					networkChangeEventToProcess.add(oneNetworkChangeEvent);
+				}
+			}
+		}
+
+		for (int i=0; i<networkChangeEventToProcess.size();i++) {
+			qSim.addNetworkChangeEvent(networkChangeEventToProcess.get(i));
+
+		}
+
+
+
 		//qSim.addNetworkChangeEvent(null);
 	}
 
@@ -119,6 +118,29 @@ public class SingleTrackListener implements MobsimInitializedListener, MobsimBef
 	}
 
 
+//	private void updateLinkVehicleNumbersEnterLinkEvent(String linkId) {
+//		if (linkId.equals("q_l_2_AB") || linkId.equals("q_l_2_BA") ) {
+//			int numberOfTrainsWaitCurrentLink = nTrainsWaitLinkAtAnyGivenTime.get(linkId);
+//			nTrainsWaitLinkAtAnyGivenTime.put(linkId,numberOfTrainsWaitCurrentLink+1);
+//		} else if (linkId.equals("l_2_AB") || linkId.equals("l_2_BA")) {
+//			linkId="q_"+linkId;
+//			int numberOfTrainsWaitCurrentLink = nTrainsWaitLinkAtAnyGivenTime.get(linkId);
+//			int numberOfTrainsEnterCurrentLink = nTrainsEnterLinkAtAnyGivenTime.get(linkId);
+//			nTrainsWaitLinkAtAnyGivenTime.put(linkId,numberOfTrainsWaitCurrentLink-1);
+//			nTrainsEnterLinkAtAnyGivenTime.put(linkId,numberOfTrainsEnterCurrentLink+1);
+//		}
+//	}
+//	
+//	
+//	private void updateLinkVehicleNumbersLeaveLinkEvent(String linkId) {
+//		if (linkId.equals("l_2_AB") || linkId.equals("l_2_BA")) {
+//			linkId="q_"+linkId;
+//			int numberOfTrainsEnterCurrentLink = nTrainsEnterLinkAtAnyGivenTime.get(linkId);
+//			nTrainsEnterLinkAtAnyGivenTime.put(linkId,numberOfTrainsEnterCurrentLink-1);
+//		}
+//	}
+	
+	
 	private void createNetworkChangeEventEnterLink(Event event, String linkId) {
 		String linkId_opposite=null;
 		if (linkId.equals("q_l_2_AB")) {
@@ -126,51 +148,49 @@ public class SingleTrackListener implements MobsimInitializedListener, MobsimBef
 		} else if (linkId.equals("q_l_2_BA")) {
 			linkId_opposite = linkId.replaceAll("_BA", "_AB");
 		}
-		
-		
-		if (linkId_opposite!=null) {
-			Integer numberOfTrainsOnOppositeLink = nTrainsOnLinkAtAnyGivenTime.get(linkId_opposite);
-			Integer numberOfTrainsWaitAtOppositeLink = nTrainsWaitAtLinkAtAnyGivenTime.get(linkId_opposite);
-			Integer numberOfTrainsWaitCurrentLink = nTrainsWaitAtLinkAtAnyGivenTime.get(linkId);
-			nTrainsWaitAtLinkAtAnyGivenTime.put(linkId,numberOfTrainsWaitCurrentLink+1);
-			if (numberOfTrainsOnOppositeLink==0 && numberOfTrainsWaitAtOppositeLink==0) {
-				
-				Id<Link> linkIDOppositeDirection = Id.createLinkId(linkId_opposite);
-				Link linkOppositeDirection = scenario.getNetwork().getLinks().get( linkIDOppositeDirection ) ;
-				NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(event.getTime()) ;
-				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  0 ));
-				networkChangeEvent.addLink(linkOppositeDirection);
-				networkChangeEventQueue.add(networkChangeEvent);
-				Integer numberOfTrainsOnCurrentLink = nTrainsOnLinkAtAnyGivenTime.get(linkId);
-				nTrainsOnLinkAtAnyGivenTime.put(linkId,numberOfTrainsOnCurrentLink+1);
-				
-				numberOfTrainsWaitCurrentLink = nTrainsWaitAtLinkAtAnyGivenTime.get(linkId);
-				nTrainsWaitAtLinkAtAnyGivenTime.put(linkId,numberOfTrainsWaitCurrentLink-1);
 
-			} else if (numberOfTrainsOnOppositeLink>0 && numberOfTrainsWaitAtOppositeLink==0) {
-				// nothing happen
-			} else if (numberOfTrainsOnOppositeLink==0 && numberOfTrainsWaitAtOppositeLink>0) {
-				
+
+		if (linkId_opposite!=null) {
+			int numberOfTrainsOppositeLink = nTrainsEnterLinkAtAnyGivenTime.get(linkId_opposite);
+			int numberOfTrainsCurrentLink = nTrainsEnterLinkAtAnyGivenTime.get(linkId);
+			
+			int numberOfTrainsWaitOppositeLink = nTrainsWaitLinkAtAnyGivenTime.get(linkId_opposite);
+			int numberOfTrainsWaitCurrentLink = nTrainsWaitLinkAtAnyGivenTime.get(linkId);
+			if (numberOfTrainsOppositeLink==0 && numberOfTrainsCurrentLink==0 && numberOfTrainsWaitOppositeLink==0 && numberOfTrainsWaitCurrentLink==0) {
+
 				Id<Link> linkIDOppositeDirection = Id.createLinkId(linkId_opposite);
 				Link linkOppositeDirection = scenario.getNetwork().getLinks().get( linkIDOppositeDirection ) ;
 				NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(event.getTime()) ;
 				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  0 ));
 				networkChangeEvent.addLink(linkOppositeDirection);
 				networkChangeEventQueue.add(networkChangeEvent);
-				Integer numberOfTrainsOnCurrentLink = nTrainsOnLinkAtAnyGivenTime.get(linkId);
-				nTrainsOnLinkAtAnyGivenTime.put(linkId,numberOfTrainsOnCurrentLink+1);
-				numberOfTrainsWaitCurrentLink = nTrainsWaitAtLinkAtAnyGivenTime.get(linkId);
-				nTrainsWaitAtLinkAtAnyGivenTime.put(linkId,numberOfTrainsWaitCurrentLink-1);
-			} else if (numberOfTrainsOnOppositeLink>0 && numberOfTrainsWaitAtOppositeLink>0) {
-				// nothing happen
+				nTrainsWaitLinkAtAnyGivenTime.put(linkId,numberOfTrainsWaitCurrentLink+1);
+
+			} else if (numberOfTrainsOppositeLink==0 && numberOfTrainsWaitOppositeLink>0 && numberOfTrainsWaitCurrentLink==0) {
+				// block your own link
+				Id<Link> linkIDCurrentDirection = Id.createLinkId(linkId);
+				Link linkCurrentDirection = scenario.getNetwork().getLinks().get( linkIDCurrentDirection ) ;
+				NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(event.getTime()) ;
+				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  0 ));
+				networkChangeEvent.addLink(linkCurrentDirection);
+				networkChangeEventQueue.add(networkChangeEvent);
+				nTrainsWaitLinkAtAnyGivenTime.put(linkId,numberOfTrainsWaitCurrentLink+1);
+			} else {
+				nTrainsWaitLinkAtAnyGivenTime.put(linkId,numberOfTrainsWaitCurrentLink+1);
 			}
-			
-			
+		}	
+		
+		if (linkId.equals("l_2_AB") || linkId.equals("l_2_BA")) {
+			String queue_linkId="q_"+linkId;
+			int numberOfTrainsWaitCurrentLink = nTrainsWaitLinkAtAnyGivenTime.get(queue_linkId);
+			int numberOfTrainsEnterCurrentLink = nTrainsEnterLinkAtAnyGivenTime.get(queue_linkId);
+			nTrainsWaitLinkAtAnyGivenTime.put(queue_linkId,numberOfTrainsWaitCurrentLink-1);
+			nTrainsEnterLinkAtAnyGivenTime.put(queue_linkId,numberOfTrainsEnterCurrentLink+1);
 		}
 
-	}
-	
-	
+	} // end createNetworkChangeEventEnterLink
+
+
 	private void createNetworkChangeEventLeaveLink(Event event, String linkId) {
 		String linkId_opposite=null;
 		if (linkId.equals("l_2_AB")) {
@@ -185,46 +205,65 @@ public class SingleTrackListener implements MobsimInitializedListener, MobsimBef
 		
 		
 		if (linkId_opposite!=null) {
-			Integer numberOfTrainsOnOppositeLink = nTrainsOnLinkAtAnyGivenTime.get(linkId_opposite);
-			Integer numberOfTrainsWaitAtOppositeLink = nTrainsWaitAtLinkAtAnyGivenTime.get(linkId_opposite);
+			int numberOfTrainsOppositeLink = nTrainsEnterLinkAtAnyGivenTime.get(linkId_opposite);
+			int numberOfTrainsCurrentLink = nTrainsEnterLinkAtAnyGivenTime.get(linkId);
 			
-			Integer numberOfTrainsOnCurrentLink = nTrainsOnLinkAtAnyGivenTime.get(linkId);
-			nTrainsOnLinkAtAnyGivenTime.put(linkId,numberOfTrainsOnCurrentLink-1);
-			if (numberOfTrainsOnOppositeLink==0 && numberOfTrainsWaitAtOppositeLink==0) {
-				
+			int numberOfTrainsWaitOppositeLink = nTrainsWaitLinkAtAnyGivenTime.get(linkId_opposite);
+			int numberOfTrainsWaitCurrentLink = nTrainsWaitLinkAtAnyGivenTime.get(linkId);
+			
+			nTrainsEnterLinkAtAnyGivenTime.put(linkId,numberOfTrainsCurrentLink-1);
+			numberOfTrainsCurrentLink = numberOfTrainsCurrentLink-1;
+			if (numberOfTrainsCurrentLink==0 && numberOfTrainsOppositeLink==0 && numberOfTrainsWaitOppositeLink>0 && numberOfTrainsWaitCurrentLink>0) {
 				Id<Link> linkIDOppositeDirection = Id.createLinkId(linkId_opposite);
 				Link linkOppositeDirection = scenario.getNetwork().getLinks().get( linkIDOppositeDirection ) ;
 				NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(event.getTime()) ;
-				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  20 ));
+				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, 1000000 ));
 				networkChangeEvent.addLink(linkOppositeDirection);
 				networkChangeEventQueue.add(networkChangeEvent);
 				
-
-			} else if (numberOfTrainsOnOppositeLink>0 && numberOfTrainsWaitAtOppositeLink==0) {
-				// wont happen
-			} else if (numberOfTrainsOnOppositeLink==0 && numberOfTrainsWaitAtOppositeLink>0) {
-				
-				Id<Link> linkIDOppositeDirection = Id.createLinkId(linkId_opposite);
-				Link linkOppositeDirection = scenario.getNetwork().getLinks().get( linkIDOppositeDirection ) ;
-				NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(event.getTime()) ;
-				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  20 ));
-				networkChangeEvent.addLink(linkOppositeDirection);
-				networkChangeEventQueue.add(networkChangeEvent);
 				
 				Id<Link> linkIDCurrentDirection = Id.createLinkId(linkId);
 				Link linkCurrentDirection = scenario.getNetwork().getLinks().get( linkIDCurrentDirection ) ;
 				NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(event.getTime()) ;
-				networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  0 ));
+				networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, 0 ));
 				networkChangeEvent2.addLink(linkCurrentDirection);
 				networkChangeEventQueue.add(networkChangeEvent2);
 				
-
-				nTrainsWaitAtLinkAtAnyGivenTime.put(linkId_opposite,numberOfTrainsWaitAtOppositeLink-1);
-				nTrainsOnLinkAtAnyGivenTime.put(linkId_opposite,numberOfTrainsOnOppositeLink+1);
+			} else if (numberOfTrainsCurrentLink==0 && numberOfTrainsOppositeLink==0 && numberOfTrainsWaitOppositeLink==0 && numberOfTrainsWaitCurrentLink==0) {
+				Id<Link> linkIDOppositeDirection = Id.createLinkId(linkId_opposite);
+				Link linkOppositeDirection = scenario.getNetwork().getLinks().get( linkIDOppositeDirection ) ;
+				NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(event.getTime()) ;
+				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, 1000000 ));
+				networkChangeEvent.addLink(linkOppositeDirection);
+				networkChangeEventQueue.add(networkChangeEvent);
 				
-			} else if (numberOfTrainsOnOppositeLink>0 && numberOfTrainsWaitAtOppositeLink>0) {
-				// wont happen
-			}	
+			} else if (numberOfTrainsCurrentLink==0 && numberOfTrainsOppositeLink==0 && numberOfTrainsWaitOppositeLink>0 && numberOfTrainsWaitCurrentLink==0) {
+				Id<Link> linkIDOppositeDirection = Id.createLinkId(linkId_opposite);
+				Link linkOppositeDirection = scenario.getNetwork().getLinks().get( linkIDOppositeDirection ) ;
+				NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(event.getTime()) ;
+				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, 1000000 ));
+				networkChangeEvent.addLink(linkOppositeDirection);
+				networkChangeEventQueue.add(networkChangeEvent);
+				
+				
+				Id<Link> linkIDCurrentDirection = Id.createLinkId(linkId);
+				Link linkCurrentDirection = scenario.getNetwork().getLinks().get( linkIDCurrentDirection ) ;
+				NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(event.getTime()) ;
+				networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, 0 ));
+				networkChangeEvent2.addLink(linkCurrentDirection);
+				networkChangeEventQueue.add(networkChangeEvent2);
+			} else if (numberOfTrainsCurrentLink==0 && numberOfTrainsOppositeLink==0 && numberOfTrainsWaitOppositeLink>0 && numberOfTrainsWaitCurrentLink>0) {
+				Id<Link> linkIDOppositeDirection = Id.createLinkId(linkId_opposite);
+				Link linkOppositeDirection = scenario.getNetwork().getLinks().get( linkIDOppositeDirection ) ;
+				NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(event.getTime()) ;
+				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, 0 ));
+				networkChangeEvent.addLink(linkOppositeDirection);
+				networkChangeEventQueue.add(networkChangeEvent);
+			}
+			
+			
+
+
 		}	
 	}	
 }

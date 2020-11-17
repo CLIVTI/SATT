@@ -7,22 +7,30 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
+
 import eventsHandling.SingleTrackListener;
 
-
-public class runTestScenario {
+public class runTestScenario_complicatedSingleTrack {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+
+		// TODO Auto-generated method stub
 		String inputDataPath = System.getProperty("user.dir")+"\\src\\main\\resources\\testData\\";
 		inputDataPath = inputDataPath.replaceAll("\\\\", "/");
-		String configFile = inputDataPath+"config-DTATest.xml";
-		String outputDirectory = inputDataPath+"output_singleTrack";
+		String configFile = inputDataPath+"config-DTA_complicatedSingleTrack.xml";
+		String planFile = inputDataPath+"testPlan_complicatedSingleTrack.xml";
+		String networkFile = inputDataPath+"testNetwork_singleTrack.xml";
+		String outputDirectory = inputDataPath+"output_complicatedSingleTrack";
 		
 		Config config = ConfigUtils.loadConfig( configFile ) ;
+		config.network().setInputFile(networkFile);
 		config.network().setTimeVariantNetwork(true);
 		config.controler().setOutputDirectory(outputDirectory);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		
+		config.plans().setInputFile(planFile);
+		
 		config.qsim().setStartTime(0*60*60);
 		config.qsim().setEndTime(24*60*60);
 		
@@ -60,6 +68,7 @@ public class runTestScenario {
 		
 		controler.run() ;
 		
+	
 	}
 
 }
