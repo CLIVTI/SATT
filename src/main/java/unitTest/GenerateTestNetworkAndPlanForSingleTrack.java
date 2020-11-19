@@ -3,7 +3,6 @@ package unitTest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.matsim.api.core.v01.Coord;
@@ -29,9 +28,9 @@ public class GenerateTestNetworkAndPlanForSingleTrack {
 // network ser ut så här:		
 	
 	
-//              l_1           l_2             l_3 
-//          o---------o----------------o------------o
-//         n_1       n_2              n_3          n_4
+//              l_1  q_l_2_AB   l_2   q_l_2_BA         l_3 
+//          o---------o---o------------o---o------------o
+//         n_1       n_2 n_2_q       n_3_q n_3          n_4
 
 	
 
@@ -44,15 +43,12 @@ public class GenerateTestNetworkAndPlanForSingleTrack {
 		
 		
 		GenerateTestNetworkAndPlanForSingleTrack test = new GenerateTestNetworkAndPlanForSingleTrack();
-		test.createNetwork(outputNetworkFile,outputPlanFile);
+		test.createNetworkAndPlan(outputNetworkFile,outputPlanFile);
 	}
 	
 	
-	public void createPlan(String outputPlanFile) {
-		
-	}
 	
-	public void createNetwork(String outputNetworkFile, String outputPlanFile){
+	public void createNetworkAndPlan(String outputNetworkFile, String outputPlanFile){
 		final Network matsimNetwork = NetworkUtils.createNetwork();
 		NetworkFactory fac = matsimNetwork.getFactory();
 		Set<String> allowedModes = new HashSet<>(Arrays.asList(TransportMode.car));
@@ -81,7 +77,7 @@ public class GenerateTestNetworkAndPlanForSingleTrack {
 		links.add(fac.createLink(Id.createLinkId("q_l_2_AB"), node2, node2q));
 		links.add(fac.createLink(Id.createLinkId("l_2_AB"), node2q, node3));
 		links.add(fac.createLink(Id.createLinkId("q_l_2_BA"), node3, node3q));
-		links.add(fac.createLink(Id.createLinkId("l_2_BA"), node3q, node2));
+		links.add(fac.createLink(Id.createLinkId("l_2_BA"), node3q, node3));
 		links.add(fac.createLink(Id.createLinkId("l_3_AB"), node3, node4));
 		links.add(fac.createLink(Id.createLinkId("l_3_BA"), node4, node3));
 		
@@ -92,14 +88,18 @@ public class GenerateTestNetworkAndPlanForSingleTrack {
 			} else {
 				eachLink.getAttributes().putAttribute("SingleTrack", 0);
 			}
+			
 			eachLink.setAllowedModes(allowedModes);
-			eachLink.setCapacity(10000000);
+			
 			eachLink.setFreespeed(90/3.6);
+			eachLink.setCapacity(eachLink.getLength()*eachLink.getFreespeed()/(eachLink.getLength()+eachLink.getFreespeed())/100*3600);
+			eachLink.getAttributes().putAttribute("Capacity", eachLink.getCapacity());
 			
 			
 			matsimNetwork.addLink(eachLink);
 		}
-
+		
+		matsimNetwork.setEffectiveCellSize(50);
 		NetworkWriter plainNetworkWriter = new NetworkWriter(matsimNetwork);
 		plainNetworkWriter.write(outputNetworkFile);
 

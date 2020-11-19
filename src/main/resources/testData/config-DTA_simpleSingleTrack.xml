@@ -36,7 +36,7 @@
 	<module name="controler">
 		<param name="outputDirectory" value="./output_singleTrack" />
 		<param name="firstIteration" value="0" />
-		<param name="lastIteration" value="2" />
+		<param name="lastIteration" value="0" />
 		<param name="eventsFileFormat" value="xml" />
 	</module>
 
@@ -67,7 +67,7 @@
 				<param name="typicalDuration" value="12:00:00" />
 			</parameterset>
 			<parameterset type="activityParams">
-				<param name="activityType"     value="work" /> <!-- work -->
+				<param name="activityType"            value="work" /> <!-- work -->
 				<param name="typicalDuration" value="08:00:00" />
 			</parameterset>
 		</parameterset>
