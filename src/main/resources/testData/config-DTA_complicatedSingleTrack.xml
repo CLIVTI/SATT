@@ -42,7 +42,8 @@
 
 
 	<module name="qsim">
-		<param name="snapshotperiod" value="00:00:00" />
+		<param name="startTime" value="00:00:00" />
+		<param name="endTime" value="0:15:00" />
 
 	</module>
 
@@ -54,10 +55,15 @@
 			<param name="performing" value="+6" />
 			<param name="waiting" value="-0" />
 
-			<parameterset type="modeParams">
-				<param name="mode" value="car"/>
-				<param name="marginalUtilityOfTraveling_util_hr" value="-6.0" />
-			</parameterset>
+		<parameterset type="modeParams">
+			<param name="mode" value="car" />
+			<param name="constant" value="0.0" />
+			<param name="marginalUtilityOfDistance_util_m" value="0.0" />
+			<param name="marginalUtilityOfTraveling_util_hr" value="-2.34" />
+			<param name="monetaryDistanceRate" value="-0.00185" /> <!-- 18.5 SEK/mil = 0.00185 SEK/m -->
+		</parameterset>
+			
+			
 			<parameterset type="modeParams">
 				<param name="mode" value="pt"/>
 			</parameterset>
@@ -74,7 +80,8 @@
 	</module>
 
 	<module name="strategy">
-		<param name="maxAgentPlanMemorySize" value="5" /> <!-- 0 means unlimited -->
+		<param name="maxAgentPlanMemorySize" value="1" /> <!-- 0 means unlimited -->
+		<param name="planSelectorForRemoval" value="WorstPlanSelector" />
 
 		<parameterset type="strategysettings">
 			<param name="strategyName" value="ChangeExpBeta"/>
@@ -88,6 +95,11 @@
 
 		<parameterset type="strategysettings">
 			<param name="strategyName" value="TimeAllocationMutator"/>
+			<param name="weight" value="0.1"/>
+		</parameterset>
+		
+		<parameterset type="strategysettings">
+			<param name="strategyName" value="TimeAllocationMutator_ReRoute"/>
 			<param name="weight" value="0.1"/>
 		</parameterset>
 	</module>
