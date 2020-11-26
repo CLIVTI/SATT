@@ -10,29 +10,26 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 import eventsHandling.SingleTrackListener;
 
-public class runTestScenario_doubleSingleTrack {
+public class runTestScenario_doubleSingleTrack_2Routes {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-		// TODO Auto-generated method stub
 		String inputDataPath = System.getProperty("user.dir")+"\\src\\main\\resources\\testData\\";
 		inputDataPath = inputDataPath.replaceAll("\\\\", "/");
-		String configFile = inputDataPath+"config-DTA_complicatedSingleTrack.xml";
+		String configFile = inputDataPath+"config-DTA_complicatedSingleTrack_2Routes.xml";
 		String planFile = inputDataPath+"testPlan_doubleSingleTrack.xml";
-		String networkFile = inputDataPath+"testNetwork_singleTrack_DoubleToSingle.xml";
-		String outputDirectory = inputDataPath+"output_doubleSingleTrack";
+		String networkFile = inputDataPath+"testNetwork_singleTrack_2Routes.xml";
+		String outputDirectory = inputDataPath+"output_doubleSingleTrack_2Routes";
 		
 		Config config = ConfigUtils.loadConfig( configFile ) ;
 		config.network().setInputFile(networkFile);
 		config.network().setTimeVariantNetwork(true);
 		config.controler().setOutputDirectory(outputDirectory);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setLastIteration(1);
+		config.controler().setLastIteration(20);
 		config.plans().setInputFile(planFile);
 		
-		config.qsim().setStartTime(0*60*60);
-		config.qsim().setEndTime(24*60*60);
+		config.qsim().setStartTime(7*60*60);
+		config.qsim().setEndTime(9*60*60);
 		
 		// create/load the scenario here.  The time variant network does already have to be set at this point
 				// in the config, otherwise it will not work.
@@ -69,6 +66,7 @@ public class runTestScenario_doubleSingleTrack {
 		
 		controler.run() ;
 		
+	
 	
 	}
 

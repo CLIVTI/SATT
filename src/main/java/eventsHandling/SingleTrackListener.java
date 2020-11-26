@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -87,12 +90,12 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		allLinkStatus.clear();
 		TPAEventsPosition=0;
 		
-		// generate wait and enter link vehiclecounters and linkStatus map.
+		// generate wait and enter link vehicle counters and linkStatus map.
 		Map<Id<Link>, ? extends Link> allLinks = scenario.getNetwork().getLinks();
 		for (Entry<Id<Link>, ? extends Link> eachLink :allLinks.entrySet()) {
 			Integer singleTrackDummy = (Integer) eachLink.getValue().getAttributes().getAttribute("SingleTrack");
 			String linkID=eachLink.getKey().toString();
-			String cleanLinkID=getCleanLinkID(linkID);
+			String cleanLinkID=linkIdProcessor.getCleanLinkID(linkID);
 			if (singleTrackDummy==1 ) {
 				nTrainsEnterLinkAtAnyGivenTime.put(eachLink.getKey().toString(), 0);
 				nTrainsWaitLinkAtAnyGivenTime.put(eachLink.getKey().toString(), 0);
@@ -122,12 +125,12 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 			Collection<Link> TPALinks = TPAEvent.getLinks();
 			for (Link TPALink :TPALinks) {
 				String TPALinkId=TPALink.getId().toString();
-				String TPALinkIdOpposite = getOppositeLinkID(TPALinkId);
+				String TPALinkIdOpposite = linkIdProcessor.getOppositeLinkID(TPALinkId);
 				nTrainsEnterLinkAtAnyGivenTime.put(TPALinkId, 0);
 				nTrainsWaitLinkAtAnyGivenTime.put(TPALinkId, 0);
 				nTrainsEnterLinkAtAnyGivenTime.put(TPALinkIdOpposite, 0);
 				nTrainsWaitLinkAtAnyGivenTime.put(TPALinkIdOpposite, 0);
-				String cleanLinkID=getCleanLinkID(TPALinkId);
+				String cleanLinkID=linkIdProcessor.getCleanLinkID(TPALinkId);
 				Integer singleTrackDummy = (Integer) allLinks.get(TPALink.getId()).getAttributes().getAttribute("SingleTrack");
 				if (singleTrackDummy==1) {
 					allLinkStatus.put(cleanLinkID, linkStatus.Single);
@@ -169,14 +172,35 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		}
 
 		// then goes through single track events
+//		double initialTime=Double.NEGATIVE_INFINITY;
+//		while (initialTime<=now & networkChangeEventQueue.size()>0) {
+//			NetworkChangeEvent oneNetworkChangeEvent = networkChangeEventQueue.peek();
+//			if (oneNetworkChangeEvent!=null) {
+//				initialTime=oneNetworkChangeEvent.getStartTime();
+//				if (initialTime<=now){
+//					oneNetworkChangeEvent = networkChangeEventQueue.poll();
+//					if (currentIter==17 && oneNetworkChangeEvent.getStartTime()==28930) {
+//                       System.out.println("At time: "+oneNetworkChangeEvent.getStartTime()+ ", the following link: "+ oneNetworkChangeEvent.getLinks() + " has a capacity network change event: " + oneNetworkChangeEvent.getFlowCapacityChange().getValue());
+//					}
+//					qSim.addNetworkChangeEvent(oneNetworkChangeEvent);
+//				} else {
+//					break;
+//				}
+//			} else {
+//				networkChangeEventQueue.poll();
+//			}
+//		}
+
+		
 		double initialTime=Double.NEGATIVE_INFINITY;
+		ArrayList<NetworkChangeEvent> toBeImplementedNetworkChangeEvents= new ArrayList<NetworkChangeEvent>();
 		while (initialTime<=now & networkChangeEventQueue.size()>0) {
 			NetworkChangeEvent oneNetworkChangeEvent = networkChangeEventQueue.peek();
 			if (oneNetworkChangeEvent!=null) {
 				initialTime=oneNetworkChangeEvent.getStartTime();
 				if (initialTime<=now){
 					oneNetworkChangeEvent = networkChangeEventQueue.poll();
-					qSim.addNetworkChangeEvent(oneNetworkChangeEvent);
+					toBeImplementedNetworkChangeEvents.add(oneNetworkChangeEvent);
 				} else {
 					break;
 				}
@@ -184,11 +208,65 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 				networkChangeEventQueue.poll();
 			}
 		}
+		
+		
+		// we need to check if any 2 events have the same link then it can be problem since we cant have two events at the same time while changing the network capacity, one x-->0 and another 0-->x.
+		// one example is that one vehicle leaves a link and another vehicle enters the link at the same time, then we change the network from 0--> x --> 0. In this case, we need to find the last network change event
+		ArrayList<String> linkID = new ArrayList<String>();
+		for (NetworkChangeEvent eachEvent : toBeImplementedNetworkChangeEvents) {
+			Collection<Link> links = eachEvent.getLinks();
+			// there is only one ,link there should be
+			for (Link link : links) {
+				linkID.add(link.getId().toString());
+				break;
+			}
+		}
+		Map<String, Long> linkIDDuplicate = linkID.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+		
+		// loop each link and depend on if there is a duplicate, do implementation.
+		 for (Map.Entry<String,Long> eachLinkId : linkIDDuplicate.entrySet()) {
+			 if (eachLinkId.getValue()>1) {
+				// if there are more than one event that involves this link, once found this event, implement it
+				 NetworkChangeEvent toBeImplementedEvent =null;
+				 for (NetworkChangeEvent thisEvent : toBeImplementedNetworkChangeEvents) {
+					 Collection<Link> links = thisEvent.getLinks();
+						// there is only one ,link there should be
+					    String thisLinkID=null;
+						for (Link link : links) {
+							thisLinkID=link.getId().toString();
+							break;
+						}
+						if (thisLinkID.equals(eachLinkId.getKey())) {
+							toBeImplementedEvent=thisEvent;
+						}
+				 }
+				 qSim.addNetworkChangeEvent(toBeImplementedEvent);
+			 } else {
+				 // if there is only one event that involves this link, once found this event, implement it
+				 for (NetworkChangeEvent thisEvent : toBeImplementedNetworkChangeEvents) {
+					 Collection<Link> links = thisEvent.getLinks();
+						// there is only one ,link there should be
+					    String thisLinkID=null;
+						for (Link link : links) {
+							thisLinkID=link.getId().toString();
+							break;
+						}
+						if (thisLinkID.equals(eachLinkId.getKey())) {
+							qSim.addNetworkChangeEvent(thisEvent);
+							break;
+						}
+					   
+						
+				 }
+			 }
+		 }
+	
+		
 	}
 
 	@Override
 	public void handleEvent(Event event) {
-		// TODO Auto-generated method stub
 		// check event and add the corresponding  network change events into networkChangeEvent.
 		switch (event.getEventType()){
 		case VehicleEntersTrafficEvent.EVENT_TYPE:
@@ -213,7 +291,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 
 	private void createNetworkChangeEventEnterLink(Event event, String linkId) {
 		boolean isSingleTrack=false;
-		String cleanLinkId=getCleanLinkID(linkId);
+		String cleanLinkId=linkIdProcessor.getCleanLinkID(linkId);
 		int numberOfTrainsOppositeLink=-1;
 		int numberOfTrainsCurrentLink=-1;
 		int numberOfTrainsWaitOppositeLink=-1;
@@ -222,7 +300,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
         // if it is q_link but not necessarily single track we just count the number of waiting and drive-in vehicles
 		if (nTrainsEnterLinkAtAnyGivenTime.containsKey(linkId)) {
 			linkStatus thisLinkStatus = allLinkStatus.get(cleanLinkId);
-			String linkId_opposite=getOppositeLinkID(linkId);
+			String linkId_opposite=linkIdProcessor.getOppositeLinkID(linkId);
 			numberOfTrainsOppositeLink = nTrainsEnterLinkAtAnyGivenTime.get(linkId_opposite);
 			numberOfTrainsCurrentLink = nTrainsEnterLinkAtAnyGivenTime.get(linkId);
 			numberOfTrainsWaitOppositeLink = nTrainsWaitLinkAtAnyGivenTime.get(linkId_opposite);
@@ -234,7 +312,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
         
 		if (isSingleTrack) {
 			if (numberOfTrainsOppositeLink==0 && numberOfTrainsCurrentLink==0 && numberOfTrainsWaitOppositeLink==0 && numberOfTrainsWaitCurrentLink==0) {
-				String linkId_opposite=getOppositeLinkID(linkId);
+				String linkId_opposite=linkIdProcessor.getOppositeLinkID(linkId);
 				Id<Link> linkIDOppositeDirection = Id.createLinkId(linkId_opposite);
 				Link linkOppositeDirection = scenario.getNetwork().getLinks().get( linkIDOppositeDirection ) ;
 				NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(event.getTime()) ;
@@ -271,7 +349,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 	private void createNetworkChangeEventLeaveLink(Event event, String linkId) {
 		boolean isSingleTrack=false;
 		linkId="q_"+linkId;
-		String cleanLinkId=getCleanLinkID(linkId);
+		String cleanLinkId=linkIdProcessor.getCleanLinkID(linkId);
 		int numberOfTrainsOppositeLink=-1;
 		int numberOfTrainsCurrentLink=-1;
 		int numberOfTrainsWaitOppositeLink=-1;
@@ -280,7 +358,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		// if it is q_link but not necessarily single track we just count the number of waiting and drive-in vehicles
 		if (nTrainsEnterLinkAtAnyGivenTime.containsKey(linkId)) {
 			linkStatus thisLinkStatus = allLinkStatus.get(cleanLinkId);
-			String linkId_opposite=getOppositeLinkID(linkId);
+			String linkId_opposite=linkIdProcessor.getOppositeLinkID(linkId);
 			numberOfTrainsOppositeLink = nTrainsEnterLinkAtAnyGivenTime.get(linkId_opposite);
 			numberOfTrainsCurrentLink = nTrainsEnterLinkAtAnyGivenTime.get(linkId);
 			numberOfTrainsWaitOppositeLink = nTrainsWaitLinkAtAnyGivenTime.get(linkId_opposite);
@@ -295,7 +373,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 
 
 		if (isSingleTrack) {
-			String linkId_opposite=getOppositeLinkID(linkId);
+			String linkId_opposite=linkIdProcessor.getOppositeLinkID(linkId);
 			if (numberOfTrainsCurrentLink==0 && numberOfTrainsOppositeLink==0 && numberOfTrainsWaitOppositeLink>0) {
 				Id<Link> linkIDOppositeDirection = Id.createLinkId(linkId_opposite);
 				Link linkOppositeDirection = scenario.getNetwork().getLinks().get( linkIDOppositeDirection ) ;
@@ -322,8 +400,12 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 				double capacity=(double) linkOppositeDirection.getAttributes().getAttribute("Capacity");
 				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, capacity ));
 				networkChangeEvent.addLink(linkCurrentDirection);
-				networkChangeEvent.addLink(linkOppositeDirection);
 				networkChangeEventQueue.add(networkChangeEvent);
+				
+				NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(event.getTime()) ;
+				networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, capacity ));
+				networkChangeEvent2.addLink(linkOppositeDirection);
+				networkChangeEventQueue.add(networkChangeEvent2);
 
 			} else if (numberOfTrainsCurrentLink==0 && numberOfTrainsOppositeLink==0 && numberOfTrainsWaitOppositeLink==0 && numberOfTrainsWaitCurrentLink>0) {
 				Id<Link> linkIDOppositeDirection = Id.createLinkId(linkId_opposite);
@@ -357,9 +439,9 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		} else if (links.size()==2) {
 			String linkId = links.get(0).getId().toString();
 			String oppositeLinkId = links.get(1).getId().toString();
-			if (getOppositeLinkID(linkId).equals(oppositeLinkId)) {
+			if (linkIdProcessor.getOppositeLinkID(linkId).equals(oppositeLinkId)) {
 				if (nTrainsEnterLinkAtAnyGivenTime.containsKey(linkId)) {
-					String cleanLinkId=getCleanLinkID(linkId);
+					String cleanLinkId=linkIdProcessor.getCleanLinkID(linkId);
 					linkStatus thisLinkStatus = allLinkStatus.get(cleanLinkId);
 					Link linkCurrentDirection = scenario.getNetwork().getLinks().get( Id.createLinkId(linkId) ) ;
 					Link linkOppositeDirection = scenario.getNetwork().getLinks().get( Id.createLinkId(oppositeLinkId) ) ;
@@ -430,12 +512,12 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 			}	
 		} else if (links.size()==1) {
 			String linkId = links.get(0).getId().toString();
-			String oppositeLinkId=getOppositeLinkID(linkId);
+			String oppositeLinkId=linkIdProcessor.getOppositeLinkID(linkId);
 			if (nTrainsEnterLinkAtAnyGivenTime.containsKey(linkId)) {
 				Link linkCurrentDirection = scenario.getNetwork().getLinks().get( Id.createLinkId(linkId) ) ;
 				Link linkOppositeDirection = scenario.getNetwork().getLinks().get( Id.createLinkId(oppositeLinkId) ) ;
 				int singleTrackDummy = (Integer) linkCurrentDirection.getAttributes().getAttribute("SingleTrack");
-				String cleanLinkId=getCleanLinkID(linkId);
+				String cleanLinkId=linkIdProcessor.getCleanLinkID(linkId);
 				linkStatus thisLinkStatus = allLinkStatus.get(cleanLinkId);
 				if (thisLinkStatus.equals(linkStatus.Double) && capacityChangedTo==0) {
 					// Double_to_Single;
@@ -526,23 +608,6 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		return null;
 	}
 
-	private static String getOppositeLinkID(String linkId) {
-		String linkId_opposite=null;
-		if (linkId.contains("_AB")) {
-			linkId_opposite = linkId.replaceAll("_AB", "_BA");
-		} else if (linkId.contains("_BA")) {
-			linkId_opposite = linkId.replaceAll("_BA", "_AB");
-		}
-		return linkId_opposite;
-	}
-
-
-	private static String getCleanLinkID(String linkId) {
-		String cleanLinkId=linkId.replaceAll("_AB", "");
-		cleanLinkId=cleanLinkId.replaceAll("_BA", "");
-		cleanLinkId=cleanLinkId.replaceAll("q_", "");
-		return cleanLinkId;
-	}
 
 }
 
