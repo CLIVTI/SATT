@@ -54,7 +54,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 
 	});
 
-	
+
 	// remember that TPAEvents can never have null. save some validity check.
 	private ArrayList<NetworkChangeEvent> TPAEvents= new ArrayList<NetworkChangeEvent>();
 
@@ -89,7 +89,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		nTrainsWaitLinkAtAnyGivenTime.clear();
 		allLinkStatus.clear();
 		TPAEventsPosition=0;
-		
+
 		// generate wait and enter link vehicle counters and linkStatus map.
 		Map<Id<Link>, ? extends Link> allLinks = scenario.getNetwork().getLinks();
 		for (Entry<Id<Link>, ? extends Link> eachLink :allLinks.entrySet()) {
@@ -120,7 +120,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 				}
 			}
 		}
-		
+
 		for (NetworkChangeEvent TPAEvent : TPAEvents) {
 			Collection<Link> TPALinks = TPAEvent.getLinks();
 			for (Link TPALink :TPALinks) {
@@ -153,7 +153,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		double now = e.getSimulationTime();
 		QSim qSim=(QSim) e.getQueueSimulation();
 
-		
+
 		double initialTime=Double.NEGATIVE_INFINITY;
 		ArrayList<NetworkChangeEvent> toBeImplementedNetworkChangeEvents= new ArrayList<NetworkChangeEvent>();
 		while (initialTime<=now & networkChangeEventQueue.size()>0) {
@@ -170,11 +170,11 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 				networkChangeEventQueue.poll();
 			}
 		}
-		
-		
+
+
 		// second add the TPA events into the ArrayList toBeImplementedNetworkChangeEvents
 		double initialTimeTPAEvents=Double.NEGATIVE_INFINITY;
-		
+
 		while (initialTimeTPAEvents<=now && (TPAEventsPosition+1)<=TPAEvents.size()) {
 			initialTimeTPAEvents=TPAEvents.get(TPAEventsPosition).getStartTime();
 			NetworkChangeEvent TPAEvent = TPAEvents.get(TPAEventsPosition);
@@ -189,7 +189,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 			TPAEventsPosition++;
 
 		}
-		
+
 		// we need to check if any 2 events have the same link then it can be problem since we cant have two events at the same time while changing the network capacity, one x-->0 and another 0-->x.
 		// one example is that one vehicle leaves a link and another vehicle enters the link at the same time, then we change the network from 0--> x --> 0. In this case, we need to find the last network change event
 		ArrayList<String> linkIds = new ArrayList<String>();
@@ -203,47 +203,47 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		}
 		Map<String, Long> linkIDDuplicate = linkIds.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-		
+
 		// loop each link and depend on if there is a duplicate, do implementation.
-		 for (Map.Entry<String,Long> eachLinkId : linkIDDuplicate.entrySet()) {
-			 if (eachLinkId.getValue()>1) {
+		for (Map.Entry<String,Long> eachLinkId : linkIDDuplicate.entrySet()) {
+			if (eachLinkId.getValue()>1) {
 				// if there are more than one event that involves this link, once found this event, implement it
-				 NetworkChangeEvent toBeImplementedEvent =null;
-				 for (NetworkChangeEvent thisEvent : toBeImplementedNetworkChangeEvents) {
-					 Collection<Link> links = thisEvent.getLinks();
-						// there is only one ,link there should be
-					    String thisLinkID=null;
-						for (Link link : links) {
-							thisLinkID=link.getId().toString();
-							break;
-						}
-						// the only possible situation is the vehicle enters and leaves the link at the same time.
-						if (thisLinkID.equals(eachLinkId.getKey())) {
-							toBeImplementedEvent=thisEvent;
-						}
-				 }
-				 qSim.addNetworkChangeEvent(toBeImplementedEvent);
-			 } else {
-				 // if there is only one event that involves this link, once found this event, implement it
-				 for (NetworkChangeEvent thisEvent : toBeImplementedNetworkChangeEvents) {
-					 Collection<Link> links = thisEvent.getLinks();
-						// there is only one ,link there should be
-					    String thisLinkID=null;
-						for (Link link : links) {
-							thisLinkID=link.getId().toString();
-							break;
-						}
-						if (thisLinkID.equals(eachLinkId.getKey())) {
-							qSim.addNetworkChangeEvent(thisEvent);
-							break;
-						}
-					   
-						
-				 }
-			 }
-		 }
-	
-		
+				NetworkChangeEvent toBeImplementedEvent =null;
+				for (NetworkChangeEvent thisEvent : toBeImplementedNetworkChangeEvents) {
+					Collection<Link> links = thisEvent.getLinks();
+					// there is only one ,link there should be
+					String thisLinkID=null;
+					for (Link link : links) {
+						thisLinkID=link.getId().toString();
+						break;
+					}
+					// the only possible situation is the vehicle enters and leaves the link at the same time.
+					if (thisLinkID.equals(eachLinkId.getKey())) {
+						toBeImplementedEvent=thisEvent;
+					}
+				}
+				qSim.addNetworkChangeEvent(toBeImplementedEvent);
+			} else {
+				// if there is only one event that involves this link, once found this event, implement it
+				for (NetworkChangeEvent thisEvent : toBeImplementedNetworkChangeEvents) {
+					Collection<Link> links = thisEvent.getLinks();
+					// there is only one ,link there should be
+					String thisLinkID=null;
+					for (Link link : links) {
+						thisLinkID=link.getId().toString();
+						break;
+					}
+					if (thisLinkID.equals(eachLinkId.getKey())) {
+						qSim.addNetworkChangeEvent(thisEvent);
+						break;
+					}
+
+
+				}
+			}
+		}
+
+
 	}
 
 	@Override
@@ -278,7 +278,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		int numberOfTrainsWaitOppositeLink=-1;
 		int numberOfTrainsWaitCurrentLink =-1;
 
-        // if it is q_link but not necessarily single track we just count the number of waiting and drive-in vehicles
+		// if it is q_link but not necessarily single track we just count the number of waiting and drive-in vehicles
 		if (nTrainsEnterLinkAtAnyGivenTime.containsKey(linkId)) {
 			linkStatus thisLinkStatus = allLinkStatus.get(cleanLinkId);
 			String linkId_opposite=linkIdProcessor.getOppositeLinkID(linkId);
@@ -290,7 +290,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 				isSingleTrack=true;
 			}
 		}
-        
+
 		if (isSingleTrack) {
 			if (numberOfTrainsOppositeLink==0 && numberOfTrainsCurrentLink==0 && numberOfTrainsWaitOppositeLink==0 && numberOfTrainsWaitCurrentLink==0) {
 				String linkId_opposite=linkIdProcessor.getOppositeLinkID(linkId);
@@ -373,17 +373,17 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 				networkChangeEventQueue.add(networkChangeEvent2);
 
 			} else if (numberOfTrainsCurrentLink==0 && numberOfTrainsOppositeLink==0 && numberOfTrainsWaitOppositeLink==0 && numberOfTrainsWaitCurrentLink==0) {
-				
+
 				Id<Link> linkIDOppositeDirection = Id.createLinkId(linkId_opposite);
 				Link linkOppositeDirection = scenario.getNetwork().getLinks().get( linkIDOppositeDirection ) ;
 				double capacity=(double) linkOppositeDirection.getAttributes().getAttribute("Capacity");
-//				Id<Link> linkIDCurrentDirection = Id.createLinkId(linkId);
-//				Link linkCurrentDirection = scenario.getNetwork().getLinks().get( linkIDCurrentDirection ) ;
-//				NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(event.getTime()) ;
-//				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, capacity ));
-//				networkChangeEvent.addLink(linkCurrentDirection);
-//				networkChangeEventQueue.add(networkChangeEvent);
-				
+				Id<Link> linkIDCurrentDirection = Id.createLinkId(linkId);
+				Link linkCurrentDirection = scenario.getNetwork().getLinks().get( linkIDCurrentDirection ) ;
+				NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(event.getTime()) ;
+				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, capacity ));
+				networkChangeEvent.addLink(linkCurrentDirection);
+				networkChangeEventQueue.add(networkChangeEvent);
+
 				NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(event.getTime()) ;
 				networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, capacity ));
 				networkChangeEvent2.addLink(linkOppositeDirection);
@@ -396,7 +396,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, 0 ));
 				networkChangeEvent.addLink(linkOppositeDirection);
 				networkChangeEventQueue.add(networkChangeEvent);
-				
+
 				Id<Link> linkIDCurrentDirection = Id.createLinkId(linkId);
 				Link linkCurrentDirection = scenario.getNetwork().getLinks().get( linkIDCurrentDirection ) ;
 				double capacity=(double) linkCurrentDirection.getAttributes().getAttribute("Capacity");
@@ -436,7 +436,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
 						TPANetworkChangeEvents.add(networkChangeEvent);
-						
+
 						NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent2.addLink(linkOppositeDirection);
@@ -449,7 +449,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
 						TPANetworkChangeEvents.add(networkChangeEvent);
-						
+
 						NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent2.addLink(linkOppositeDirection);
@@ -465,8 +465,8 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
-                        TPANetworkChangeEvents.add(networkChangeEvent);
-						
+						TPANetworkChangeEvents.add(networkChangeEvent);
+
 						NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent2.addLink(linkOppositeDirection);
@@ -479,7 +479,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
 						TPANetworkChangeEvents.add(networkChangeEvent);
-						
+
 						NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent2.addLink(linkOppositeDirection);
@@ -528,7 +528,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
 						TPANetworkChangeEvents.add(networkChangeEvent);
-						
+
 						NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent2.addLink(linkOppositeDirection);
@@ -560,7 +560,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 					networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 					networkChangeEvent.addLink(linkCurrentDirection);
 					TPANetworkChangeEvents.add(networkChangeEvent);
-					
+
 					NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 					networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 					networkChangeEvent2.addLink(linkOppositeDirection);
@@ -577,7 +577,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 					networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 					networkChangeEvent.addLink(linkCurrentDirection);
 					TPANetworkChangeEvents.add(networkChangeEvent);
-					
+
 					NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 					networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 					networkChangeEvent2.addLink(linkOppositeDirection);
@@ -611,7 +611,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
 						TPANetworkChangeEvents.add(networkChangeEvent);
-						
+
 						NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent2.addLink(linkOppositeDirection);
