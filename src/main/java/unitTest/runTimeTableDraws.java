@@ -9,9 +9,9 @@ import eventsHandling.VehicleTrackHandler;
 public class runTimeTableDraws {
 
 	public static void main(String[] args) {
-		String inputDataPath = System.getProperty("user.dir")+"\\src\\main\\resources\\testData\\output_doubleSingleTrack_DoubleToSingle\\";
+		String inputDataPath = System.getProperty("user.dir")+"\\src\\main\\resources\\testData\\output_doubleSingleTrack_2Routes_SingleToClose\\ITERS\\it.15\\";
 		inputDataPath = inputDataPath.replaceAll("\\\\", "/");
-		String inputEventFilePath = inputDataPath+"output_events.xml.gz";
+		String inputEventFilePath = inputDataPath+"15.events.xml.gz";
 		String writeTimeTablePath = inputDataPath+"timeTable.png";
 		EventsManager events = EventsUtils.createEventsManager();
 		

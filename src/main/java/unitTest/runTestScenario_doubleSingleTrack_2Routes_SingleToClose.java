@@ -35,8 +35,10 @@ public class runTestScenario_doubleSingleTrack_2Routes_SingleToClose {
 		config.network().setTimeVariantNetwork(true);
 		config.controler().setOutputDirectory(outputDirectory);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setLastIteration(20);
+		config.controler().setLastIteration(30);
+		config.controler().setWriteEventsInterval(1);
 		config.plans().setInputFile(planFile);
+		
 		
 		config.qsim().setStartTime(7*60*60);
 		config.qsim().setEndTime(9*60*60);
@@ -57,7 +59,7 @@ public class runTestScenario_doubleSingleTrack_2Routes_SingleToClose {
 		NetworkUtils.addNetworkChangeEvent(nt,networkChangeEvent);
 		
 
-		NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(8*60*60+90) ;
+		NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(8*60*60+180) ;
 		networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  60 ));
 		networkChangeEvent2.addLink(linkToClose);
 		NetworkUtils.addNetworkChangeEvent(nt,networkChangeEvent2);

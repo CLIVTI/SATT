@@ -26,6 +26,7 @@ public class runTestScenario_doubleSingleTrack_2Routes {
 		config.controler().setOutputDirectory(outputDirectory);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		config.controler().setLastIteration(20);
+		config.controler().setWriteEventsInterval(1);
 		config.plans().setInputFile(planFile);
 		
 		config.qsim().setStartTime(7*60*60);

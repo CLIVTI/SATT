@@ -153,44 +153,6 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		double now = e.getSimulationTime();
 		QSim qSim=(QSim) e.getQueueSimulation();
 
-		// first check the TPA events
-		double initialTimeTPAEvents=Double.NEGATIVE_INFINITY;
-		
-		while (initialTimeTPAEvents<=now && (TPAEventsPosition+1)<=TPAEvents.size()) {
-			initialTimeTPAEvents=TPAEvents.get(TPAEventsPosition).getStartTime();
-			NetworkChangeEvent TPAEvent = TPAEvents.get(TPAEventsPosition);
-			if (initialTimeTPAEvents<=now){
-				NetworkChangeEvent implementedEvent = generatePossibleTPANetworkChangeEventAndUpdateStatusVariables(TPAEvent);
-				if (implementedEvent!=null) {
-					qSim.addNetworkChangeEvent(implementedEvent);
-				}
-			}else {
-				break;
-			}	
-			TPAEventsPosition++;
-
-		}
-
-		// then goes through single track events
-//		double initialTime=Double.NEGATIVE_INFINITY;
-//		while (initialTime<=now & networkChangeEventQueue.size()>0) {
-//			NetworkChangeEvent oneNetworkChangeEvent = networkChangeEventQueue.peek();
-//			if (oneNetworkChangeEvent!=null) {
-//				initialTime=oneNetworkChangeEvent.getStartTime();
-//				if (initialTime<=now){
-//					oneNetworkChangeEvent = networkChangeEventQueue.poll();
-//					if (currentIter==17 && oneNetworkChangeEvent.getStartTime()==28930) {
-//                       System.out.println("At time: "+oneNetworkChangeEvent.getStartTime()+ ", the following link: "+ oneNetworkChangeEvent.getLinks() + " has a capacity network change event: " + oneNetworkChangeEvent.getFlowCapacityChange().getValue());
-//					}
-//					qSim.addNetworkChangeEvent(oneNetworkChangeEvent);
-//				} else {
-//					break;
-//				}
-//			} else {
-//				networkChangeEventQueue.poll();
-//			}
-//		}
-
 		
 		double initialTime=Double.NEGATIVE_INFINITY;
 		ArrayList<NetworkChangeEvent> toBeImplementedNetworkChangeEvents= new ArrayList<NetworkChangeEvent>();
@@ -210,18 +172,36 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		}
 		
 		
+		// second add the TPA events into the ArrayList toBeImplementedNetworkChangeEvents
+		double initialTimeTPAEvents=Double.NEGATIVE_INFINITY;
+		
+		while (initialTimeTPAEvents<=now && (TPAEventsPosition+1)<=TPAEvents.size()) {
+			initialTimeTPAEvents=TPAEvents.get(TPAEventsPosition).getStartTime();
+			NetworkChangeEvent TPAEvent = TPAEvents.get(TPAEventsPosition);
+			if (initialTimeTPAEvents<=now){
+				ArrayList<NetworkChangeEvent> implementedEvents = generatePossibleTPANetworkChangeEventAndUpdateStatusVariables(TPAEvent);
+				for (NetworkChangeEvent implementedEvent : implementedEvents) {
+					toBeImplementedNetworkChangeEvents.add(implementedEvent);
+				}
+			}else {
+				break;
+			}	
+			TPAEventsPosition++;
+
+		}
+		
 		// we need to check if any 2 events have the same link then it can be problem since we cant have two events at the same time while changing the network capacity, one x-->0 and another 0-->x.
 		// one example is that one vehicle leaves a link and another vehicle enters the link at the same time, then we change the network from 0--> x --> 0. In this case, we need to find the last network change event
-		ArrayList<String> linkID = new ArrayList<String>();
+		ArrayList<String> linkIds = new ArrayList<String>();
 		for (NetworkChangeEvent eachEvent : toBeImplementedNetworkChangeEvents) {
 			Collection<Link> links = eachEvent.getLinks();
 			// there is only one ,link there should be
 			for (Link link : links) {
-				linkID.add(link.getId().toString());
+				linkIds.add(link.getId().toString());
 				break;
 			}
 		}
-		Map<String, Long> linkIDDuplicate = linkID.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+		Map<String, Long> linkIDDuplicate = linkIds.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
 		
 		// loop each link and depend on if there is a duplicate, do implementation.
@@ -237,6 +217,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 							thisLinkID=link.getId().toString();
 							break;
 						}
+						// the only possible situation is the vehicle enters and leaves the link at the same time.
 						if (thisLinkID.equals(eachLinkId.getKey())) {
 							toBeImplementedEvent=thisEvent;
 						}
@@ -392,15 +373,16 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 				networkChangeEventQueue.add(networkChangeEvent2);
 
 			} else if (numberOfTrainsCurrentLink==0 && numberOfTrainsOppositeLink==0 && numberOfTrainsWaitOppositeLink==0 && numberOfTrainsWaitCurrentLink==0) {
-				Id<Link> linkIDCurrentDirection = Id.createLinkId(linkId);
+				
 				Id<Link> linkIDOppositeDirection = Id.createLinkId(linkId_opposite);
-				Link linkCurrentDirection = scenario.getNetwork().getLinks().get( linkIDCurrentDirection ) ;
 				Link linkOppositeDirection = scenario.getNetwork().getLinks().get( linkIDOppositeDirection ) ;
-				NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(event.getTime()) ;
 				double capacity=(double) linkOppositeDirection.getAttributes().getAttribute("Capacity");
-				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, capacity ));
-				networkChangeEvent.addLink(linkCurrentDirection);
-				networkChangeEventQueue.add(networkChangeEvent);
+//				Id<Link> linkIDCurrentDirection = Id.createLinkId(linkId);
+//				Link linkCurrentDirection = scenario.getNetwork().getLinks().get( linkIDCurrentDirection ) ;
+//				NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(event.getTime()) ;
+//				networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, capacity ));
+//				networkChangeEvent.addLink(linkCurrentDirection);
+//				networkChangeEventQueue.add(networkChangeEvent);
 				
 				NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(event.getTime()) ;
 				networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, capacity ));
@@ -426,7 +408,8 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		}	
 	}
 
-	private NetworkChangeEvent generatePossibleTPANetworkChangeEventAndUpdateStatusVariables(NetworkChangeEvent TPAEvent) {
+	private ArrayList<NetworkChangeEvent> generatePossibleTPANetworkChangeEventAndUpdateStatusVariables(NetworkChangeEvent TPAEvent) {
+		ArrayList<NetworkChangeEvent> TPANetworkChangeEvents = new ArrayList<NetworkChangeEvent>();
 		double capacityChangedTo=TPAEvent.getFlowCapacityChange().getValue();
 		Collection<Link> linksCollection = TPAEvent.getLinks();
 		ArrayList<Link> links =new ArrayList<Link>();
@@ -452,16 +435,26 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
-						networkChangeEvent.addLink(linkOppositeDirection);
-						return networkChangeEvent;
+						TPANetworkChangeEvents.add(networkChangeEvent);
+						
+						NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
+						networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
+						networkChangeEvent2.addLink(linkOppositeDirection);
+						TPANetworkChangeEvents.add(networkChangeEvent2);
+						return TPANetworkChangeEvents;
 					} else if (thisLinkStatus.equals(linkStatus.Single) && capacityChangedTo==0) {
 						// Single_to_Close
 						allLinkStatus.put(cleanLinkId,linkStatus.Closed);
 						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS, capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
-						networkChangeEvent.addLink(linkOppositeDirection);
-						return networkChangeEvent;
+						TPANetworkChangeEvents.add(networkChangeEvent);
+						
+						NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
+						networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
+						networkChangeEvent2.addLink(linkOppositeDirection);
+						TPANetworkChangeEvents.add(networkChangeEvent2);
+						return TPANetworkChangeEvents;
 					} else if (thisLinkStatus.equals(linkStatus.Closed) && capacityChangedTo==0)  {
 						// nothing happens
 					} else if (thisLinkStatus.equals(linkStatus.Double) && capacityChangedTo>0) {
@@ -472,37 +465,29 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
-						networkChangeEvent.addLink(linkOppositeDirection);
-						return networkChangeEvent;
+                        TPANetworkChangeEvents.add(networkChangeEvent);
+						
+						NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
+						networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
+						networkChangeEvent2.addLink(linkOppositeDirection);
+						TPANetworkChangeEvents.add(networkChangeEvent2);
+						return TPANetworkChangeEvents;
 					} else if (thisLinkStatus.equals(linkStatus.Closed) && capacityChangedTo>0 && singleTrackDummy==0) {
 						// Close_to_Double;
 						allLinkStatus.put(cleanLinkId,linkStatus.Double);
 						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
-						networkChangeEvent.addLink(linkOppositeDirection);
-						return networkChangeEvent;
+						TPANetworkChangeEvents.add(networkChangeEvent);
+						
+						NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
+						networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
+						networkChangeEvent2.addLink(linkOppositeDirection);
+						TPANetworkChangeEvents.add(networkChangeEvent2);
+						return TPANetworkChangeEvents;
 					} else if (thisLinkStatus.equals(linkStatus.Closed) && capacityChangedTo>0 && singleTrackDummy==1) {
-						// Close_to_Single;
-						allLinkStatus.put(cleanLinkId,linkStatus.Single);
-						int numberOfTrainsWaitCurrentLink = nTrainsWaitLinkAtAnyGivenTime.get(linkId);
-						int numberOfTrainsWaitOppositeLink = nTrainsWaitLinkAtAnyGivenTime.get(oppositeLinkId);
-						if (numberOfTrainsWaitCurrentLink>0 && numberOfTrainsWaitOppositeLink==0) {
-							NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
-							networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
-							networkChangeEvent.addLink(linkCurrentDirection);
-							return networkChangeEvent;
-						} else if (numberOfTrainsWaitCurrentLink==0 && numberOfTrainsWaitOppositeLink>0) {
-							NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
-							networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
-							networkChangeEvent.addLink(linkOppositeDirection);
-							return networkChangeEvent;
-						} else if (numberOfTrainsWaitCurrentLink>0 && numberOfTrainsWaitOppositeLink>0) {
-							NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
-							networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
-							networkChangeEvent.addLink(linkCurrentDirection);
-							return networkChangeEvent;
-						}
+						// should never happen if this is a single track and you close the link, should only indicate one link.
+						throw new RuntimeException("link Id: "+ linkId+" and link Id: " + oppositeLinkId + " should not be added at the same time on a single track that is going to be shifted from closed to single.") ;
 					}
 				} else {
 					throw new RuntimeException( linkId + " or "+ oppositeLinkId + " is not a q_ link.") ;
@@ -530,33 +515,43 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkOppositeDirection);
-						return networkChangeEvent;
+						TPANetworkChangeEvents.add(networkChangeEvent);
+						return TPANetworkChangeEvents;
 					} else if (numberOfTrainsCurrentLink==0 && numberOfTrainsOppositeLink>0) {
 						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
-						return networkChangeEvent;
+						TPANetworkChangeEvents.add(networkChangeEvent);
+						return TPANetworkChangeEvents;
 					} else if (numberOfTrainsCurrentLink>0 && numberOfTrainsOppositeLink>0) {
 						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
-						networkChangeEvent.addLink(linkOppositeDirection);
-						return networkChangeEvent;
+						TPANetworkChangeEvents.add(networkChangeEvent);
+						
+						NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
+						networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
+						networkChangeEvent2.addLink(linkOppositeDirection);
+						TPANetworkChangeEvents.add(networkChangeEvent2);
+						return TPANetworkChangeEvents;
 					} else if (numberOfTrainsCurrentLink==0 && numberOfTrainsOppositeLink==0 && numberOfTrainsWaitCurrentLink>0 && numberOfTrainsWaitOppositeLink==0) {
 						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkOppositeDirection);
-						return networkChangeEvent;
+						TPANetworkChangeEvents.add(networkChangeEvent);
+						return TPANetworkChangeEvents;
 					} else if (numberOfTrainsCurrentLink==0 && numberOfTrainsOppositeLink==0 && numberOfTrainsWaitCurrentLink==0 && numberOfTrainsWaitOppositeLink>0) {
 						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
-						return networkChangeEvent;
+						TPANetworkChangeEvents.add(networkChangeEvent);
+						return TPANetworkChangeEvents;
 					} else if (numberOfTrainsCurrentLink==0 && numberOfTrainsOppositeLink==0 && numberOfTrainsWaitCurrentLink>0 && numberOfTrainsWaitOppositeLink>0) {
 						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
-						return networkChangeEvent;
+						TPANetworkChangeEvents.add(networkChangeEvent);
+						return TPANetworkChangeEvents;
 					}
 				} else if (thisLinkStatus.equals(linkStatus.Single) && capacityChangedTo==0) {
 					// Single_to_Close;
@@ -564,8 +559,13 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 					NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 					networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 					networkChangeEvent.addLink(linkCurrentDirection);
-					networkChangeEvent.addLink(linkOppositeDirection);
-					return networkChangeEvent;
+					TPANetworkChangeEvents.add(networkChangeEvent);
+					
+					NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
+					networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
+					networkChangeEvent2.addLink(linkOppositeDirection);
+					TPANetworkChangeEvents.add(networkChangeEvent2);
+					return TPANetworkChangeEvents;
 				} else if (thisLinkStatus.equals(linkStatus.Closed) && capacityChangedTo==0)  {
 					// nothing happens
 				} else if (thisLinkStatus.equals(linkStatus.Double) && capacityChangedTo>0) {
@@ -576,8 +576,13 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 					NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 					networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 					networkChangeEvent.addLink(linkCurrentDirection);
-					networkChangeEvent.addLink(linkOppositeDirection);
-					return networkChangeEvent;
+					TPANetworkChangeEvents.add(networkChangeEvent);
+					
+					NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
+					networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
+					networkChangeEvent2.addLink(linkOppositeDirection);
+					TPANetworkChangeEvents.add(networkChangeEvent2);
+					return TPANetworkChangeEvents;
 				} else if (thisLinkStatus.equals(linkStatus.Closed) && capacityChangedTo>0) {
 					// Close_to_Single;
 					allLinkStatus.put(cleanLinkId,linkStatus.Single);
@@ -587,17 +592,31 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
-						return networkChangeEvent;
+						TPANetworkChangeEvents.add(networkChangeEvent);
+						return TPANetworkChangeEvents;
 					} else if (numberOfTrainsWaitCurrentLink==0 && numberOfTrainsWaitOppositeLink>0) {
 						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkOppositeDirection);
-						return networkChangeEvent;
+						TPANetworkChangeEvents.add(networkChangeEvent);	
+						return TPANetworkChangeEvents;
 					} else if (numberOfTrainsWaitCurrentLink>0 && numberOfTrainsWaitOppositeLink>0) {
 						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
 						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
 						networkChangeEvent.addLink(linkCurrentDirection);
-						return networkChangeEvent;
+						TPANetworkChangeEvents.add(networkChangeEvent);
+						return TPANetworkChangeEvents;
+					} else if (numberOfTrainsWaitCurrentLink==0 && numberOfTrainsWaitOppositeLink==0) {
+						NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
+						networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
+						networkChangeEvent.addLink(linkCurrentDirection);
+						TPANetworkChangeEvents.add(networkChangeEvent);
+						
+						NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(TPAEvent.getStartTime()) ;
+						networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  capacityChangedTo ));
+						networkChangeEvent2.addLink(linkOppositeDirection);
+						TPANetworkChangeEvents.add(networkChangeEvent2);
+						return TPANetworkChangeEvents;
 					}
 				}
 			} else {
@@ -605,7 +624,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 			}
 		}
 
-		return null;
+		return TPANetworkChangeEvents;
 	}
 
 
