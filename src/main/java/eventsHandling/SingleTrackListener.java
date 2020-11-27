@@ -179,10 +179,17 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 			initialTimeTPAEvents=TPAEvents.get(TPAEventsPosition).getStartTime();
 			NetworkChangeEvent TPAEvent = TPAEvents.get(TPAEventsPosition);
 			if (initialTimeTPAEvents<=now){
-				ArrayList<NetworkChangeEvent> implementedEvents = generatePossibleTPANetworkChangeEventAndUpdateStatusVariables(TPAEvent);
-				for (NetworkChangeEvent implementedEvent : implementedEvents) {
-					toBeImplementedNetworkChangeEvents.add(implementedEvent);
+				if (TPAEvent.getFlowCapacityChange()!=null) {
+					ArrayList<NetworkChangeEvent> implementedEvents = generatePossibleTPANetworkChangeEventAndUpdateStatusVariables(TPAEvent);
+					for (NetworkChangeEvent implementedEvent : implementedEvents) {
+						toBeImplementedNetworkChangeEvents.add(implementedEvent);
+					}
+				} else if (TPAEvent.getFreespeedChange()!=null) { // if it is freeSpeedChange
+					qSim.addNetworkChangeEvent(TPAEvent);
 				}
+				
+				
+				
 			}else {
 				break;
 			}	
@@ -211,7 +218,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 				NetworkChangeEvent toBeImplementedEvent =null;
 				for (NetworkChangeEvent thisEvent : toBeImplementedNetworkChangeEvents) {
 					Collection<Link> links = thisEvent.getLinks();
-					// there is only one ,link there should be
+					// there should only be one link.
 					String thisLinkID=null;
 					for (Link link : links) {
 						thisLinkID=link.getId().toString();
