@@ -122,20 +122,22 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		}
 
 		for (NetworkChangeEvent TPAEvent : TPAEvents) {
-			Collection<Link> TPALinks = TPAEvent.getLinks();
-			for (Link TPALink :TPALinks) {
-				String TPALinkId=TPALink.getId().toString();
-				String TPALinkIdOpposite = linkIdProcessor.getOppositeLinkID(TPALinkId);
-				nTrainsEnterLinkAtAnyGivenTime.put(TPALinkId, 0);
-				nTrainsWaitLinkAtAnyGivenTime.put(TPALinkId, 0);
-				nTrainsEnterLinkAtAnyGivenTime.put(TPALinkIdOpposite, 0);
-				nTrainsWaitLinkAtAnyGivenTime.put(TPALinkIdOpposite, 0);
-				String cleanLinkID=linkIdProcessor.getCleanLinkID(TPALinkId);
-				Integer singleTrackDummy = (Integer) allLinks.get(TPALink.getId()).getAttributes().getAttribute("SingleTrack");
-				if (singleTrackDummy==1) {
-					allLinkStatus.put(cleanLinkID, linkStatus.Single);
-				} else {
-					allLinkStatus.put(cleanLinkID, linkStatus.Double);
+			if (TPAEvent.getFlowCapacityChange()!=null) {
+				Collection<Link> TPALinks = TPAEvent.getLinks();
+				for (Link TPALink :TPALinks) {
+					String TPALinkId=TPALink.getId().toString();
+					String TPALinkIdOpposite = linkIdProcessor.getOppositeLinkID(TPALinkId);
+					nTrainsEnterLinkAtAnyGivenTime.put(TPALinkId, 0);
+					nTrainsWaitLinkAtAnyGivenTime.put(TPALinkId, 0);
+					nTrainsEnterLinkAtAnyGivenTime.put(TPALinkIdOpposite, 0);
+					nTrainsWaitLinkAtAnyGivenTime.put(TPALinkIdOpposite, 0);
+					String cleanLinkID=linkIdProcessor.getCleanLinkID(TPALinkId);
+					Integer singleTrackDummy = (Integer) allLinks.get(TPALink.getId()).getAttributes().getAttribute("SingleTrack");
+					if (singleTrackDummy==1) {
+						allLinkStatus.put(cleanLinkID, linkStatus.Single);
+					} else {
+						allLinkStatus.put(cleanLinkID, linkStatus.Double);
+					}
 				}
 			}
 		}
@@ -149,11 +151,10 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 
 	@Override
 	public void notifyMobsimBeforeSimStep(MobsimBeforeSimStepEvent e) {
-		// TODO Auto-generated method stub
 		double now = e.getSimulationTime();
 		QSim qSim=(QSim) e.getQueueSimulation();
 
-
+        // first add single track related networkChangeEvent into the ArrayList toBeImplementedNetworkChangeEvents
 		double initialTime=Double.NEGATIVE_INFINITY;
 		ArrayList<NetworkChangeEvent> toBeImplementedNetworkChangeEvents= new ArrayList<NetworkChangeEvent>();
 		while (initialTime<=now & networkChangeEventQueue.size()>0) {
@@ -184,17 +185,13 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 					for (NetworkChangeEvent implementedEvent : implementedEvents) {
 						toBeImplementedNetworkChangeEvents.add(implementedEvent);
 					}
-				} else if (TPAEvent.getFreespeedChange()!=null) { // if it is freeSpeedChange
+				} else if (TPAEvent.getFreespeedChange()!=null) { // if it is freeSpeedChange just implement it
 					qSim.addNetworkChangeEvent(TPAEvent);
 				}
-				
-				
-				
 			}else {
 				break;
 			}	
 			TPAEventsPosition++;
-
 		}
 
 		// we need to check if any 2 events have the same link then it can be problem since we cant have two events at the same time while changing the network capacity, one x-->0 and another 0-->x.
@@ -202,7 +199,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		ArrayList<String> linkIds = new ArrayList<String>();
 		for (NetworkChangeEvent eachEvent : toBeImplementedNetworkChangeEvents) {
 			Collection<Link> links = eachEvent.getLinks();
-			// there is only one ,link there should be
+			// there should be only one link
 			for (Link link : links) {
 				linkIds.add(link.getId().toString());
 				break;
@@ -214,7 +211,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		// loop each link and depend on if there is a duplicate, do implementation.
 		for (Map.Entry<String,Long> eachLinkId : linkIDDuplicate.entrySet()) {
 			if (eachLinkId.getValue()>1) {
-				// if there are more than one event that involves this link, once found this event, implement it
+				// if there are more than one event that involves this link, implement the last one (i think this is correct but not 100% sure)
 				NetworkChangeEvent toBeImplementedEvent =null;
 				for (NetworkChangeEvent thisEvent : toBeImplementedNetworkChangeEvents) {
 					Collection<Link> links = thisEvent.getLinks();

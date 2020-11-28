@@ -17,7 +17,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 import eventsHandling.SingleTrackListener;
 
-public class runTestScenario_doubleSingleTrack_2Routes_SingleToClose {
+public class runTestScenario_doubleSingleTrack_2Routes_SingleToClose_SpeedChange {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -28,7 +28,7 @@ public class runTestScenario_doubleSingleTrack_2Routes_SingleToClose {
 		String configFile = inputDataPath+"config-DTA_complicatedSingleTrack_2Routes.xml";
 		String planFile = inputDataPath+"testPlan_doubleSingleTrack.xml";
 		String networkFile = inputDataPath+"testNetwork_singleTrack_2Routes_SingleToClose.xml";
-		String outputDirectory = inputDataPath+"output_doubleSingleTrack_2Routes_SingleToClose";
+		String outputDirectory = inputDataPath+"output_doubleSingleTrack_2Routes_SingleToClose_SpeedChange";
 		
 		Config config = ConfigUtils.loadConfig( configFile ) ;
 		config.network().setInputFile(networkFile);
@@ -65,6 +65,22 @@ public class runTestScenario_doubleSingleTrack_2Routes_SingleToClose {
 		networkChangeEvent2.addLink(linkToClose);
 		NetworkUtils.addNetworkChangeEvent(nt,networkChangeEvent2);
 		
+		// speed change events
+		Id<Link> l_6_AB = Id.createLinkId("l_6_AB");
+		Id<Link> l_6_BA = Id.createLinkId("l_6_BA");
+		Link link_l_6_AB = nt.getLinks().get(l_6_AB  ) ;
+		Link link_l_6_BA = nt.getLinks().get(l_6_BA  ) ;
+		NetworkChangeEvent networkChangeEvent3 = new NetworkChangeEvent(8*60*60+60) ;
+		networkChangeEvent3.setFreespeedChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  5 ));
+		networkChangeEvent3.addLink(link_l_6_AB);
+		networkChangeEvent3.addLink(link_l_6_BA);
+		NetworkUtils.addNetworkChangeEvent(nt,networkChangeEvent3);
+		
+		NetworkChangeEvent networkChangeEvent4 = new NetworkChangeEvent(8*60*60+90) ;
+		networkChangeEvent4.setFreespeedChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  25 ));
+		networkChangeEvent4.addLink(link_l_6_AB);
+		networkChangeEvent4.addLink(link_l_6_BA);
+		NetworkUtils.addNetworkChangeEvent(nt,networkChangeEvent4);
 		
 		// add the events handlers
 		Controler controler = new Controler( scenario ) ;
