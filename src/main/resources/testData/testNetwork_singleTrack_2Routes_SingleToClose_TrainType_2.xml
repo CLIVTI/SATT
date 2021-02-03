@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE network SYSTEM "http://www.matsim.org/files/dtd/network_v2.dtd">
+<network>
+
+<!-- ====================================================================== -->
+
+	<nodes>
+		<node id="n_1" x="0.0" y="0.0" >
+		</node>
+		<node id="n_2" x="1000.0" y="0.0" >
+		</node>
+		<node id="n_2_q" x="1050.0" y="0.0" >
+		</node>
+		<node id="n_3_1" x="1990.0" y="0.0" >
+		</node>
+		<node id="n_3_1_q" x="1950.0" y="0.0" >
+		</node>
+		<node id="n_3_2" x="2010.0" y="0.0" >
+		</node>
+		<node id="n_3_2_q" x="2050.0" y="0.0" >
+		</node>
+		<node id="n_4" x="3000.0" y="0.0" >
+		</node>
+		<node id="n_4_q" x="2950.0" y="0.0" >
+		</node>
+		<node id="n_5" x="4000.0" y="0.0" >
+		</node>
+		<node id="n_6" x="2000.0" y="1374.773" >
+		</node>
+	</nodes>
+
+<!-- ====================================================================== -->
+
+	<links capperiod="01:00:00" effectivecellsize="7.5" effectivelanewidth="3.75">
+		<link id="c_l_3_AB" from="n_3_1" to="n_3_2" length="20.0" freespeed="25.0" capacity="1.0E7" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">1.0E7</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+		<link id="c_l_3_BA" from="n_3_2" to="n_3_1" length="20.0" freespeed="25.0" capacity="1.0E7" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">1.0E7</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+		<link id="l_1_AB" from="n_1" to="n_2" length="1000.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">60.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+		<link id="l_1_BA" from="n_2" to="n_1" length="1000.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">60.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+		<link id="l_2_AB" from="n_2_q" to="n_3_1" length="940.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">60.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+		<link id="l_2_BA" from="n_3_1_q" to="n_2" length="950.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">60.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+		<link id="l_3_AB" from="n_3_2_q" to="n_4" length="950.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">60.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+		<link id="l_3_BA" from="n_4_q" to="n_3_2" length="940.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">60.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+		<link id="l_4_AB" from="n_4" to="n_5" length="1000.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">60.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+		<link id="l_4_BA" from="n_5" to="n_4" length="1000.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">60.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+		<link id="q_l_2_AB" from="n_2" to="n_2_q" length="50.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">60.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">1</attribute>
+			</attributes>
+		</link>
+		<link id="q_l_2_BA" from="n_3_1" to="n_3_1_q" length="40.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">60.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">1</attribute>
+			</attributes>
+		</link>
+		<link id="q_l_3_AB" from="n_3_2" to="n_3_2_q" length="40.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">60.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">1</attribute>
+			</attributes>
+		</link>
+		<link id="q_l_3_BA" from="n_4" to="n_4_q" length="50.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">60.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">1</attribute>
+			</attributes>
+		</link>
+		<link id="l_5_AB" from="n_2" to="n_6" length="1500.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">10.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+		<link id="l_5_BA" from="n_6" to="n_2" length="1500.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">10.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+		<link id="l_6_AB" from="n_6" to="n_4" length="1500.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">10.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+		<link id="l_6_BA" from="n_4" to="n_6" length="1500.0" freespeed="25.0" capacity="60.0" permlanes="1.0" oneway="1" modes="car" >
+			<attributes>
+				<attribute name="Capacity" class="java.lang.Double">10.0</attribute>
+				<attribute name="SingleTrack" class="java.lang.Integer">0</attribute>
+			</attributes>
+		</link>
+	</links>
+
+<!-- ====================================================================== -->
+
+</network>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vehicleDefinitions xmlns="http://www.matsim.org/files/dtd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.matsim.org/files/dtd http://www.matsim.org/files/dtd/vehicleDefinitions_v1.0.xsd">
+	<vehicleType id="car">
+		<length meter="7.5"/>
+		<width meter="1.0"/>
+		<maximumVelocity meterPerSecond="25"/>
+		<passengerCarEquivalents pce="1"/>
+	</vehicleType>
+	<vehicleType id="fastTrain">
+		<length meter="50"/>
+		<width meter="1.0"/>
+		<maximumVelocity meterPerSecond="25"/>
+		<passengerCarEquivalents pce="1.0"/>
+	</vehicleType>
+	<vehicleType id="slowTrain">
+		<length meter="50"/>
+		<width meter="1.0"/>
+		<maximumVelocity meterPerSecond="10"/>
+		<passengerCarEquivalents pce="1"/>
+	</vehicleType>
+
+    <vehicle id="P_AB_1" type="fastTrain"/>
+    <vehicle id="P_AB_2" type="slowTrain"/>
+    <vehicle id="P_AB_3" type="fastTrain"/>
+    <vehicle id="P_AB_4" type="slowTrain"/>
+    <vehicle id="P_AB_5" type="fastTrain"/>
+    <vehicle id="P_BA_1" type="slowTrain"/>
+    <vehicle id="P_BA_2" type="fastTrain"/>
+    <vehicle id="P_BA_3" type="slowTrain"/>
+    <vehicle id="P_BA_4" type="fastTrain"/>
+    <vehicle id="P_BA_5" type="slowTrain"/>
+</vehicleDefinitions>

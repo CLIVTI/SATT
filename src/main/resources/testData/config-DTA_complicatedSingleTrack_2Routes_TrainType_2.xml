@@ -1,0 +1,123 @@
+<?xml version="1.0" ?>
+<!--
+  ~ /* *********************************************************************** *
+  ~  * project: org.matsim.*
+  ~  * example7-config.xml
+  ~  *                                                                         *
+  ~  * *********************************************************************** *
+  ~  *                                                                         *
+  ~  * copyright       : (C) 2014 by the members listed in the COPYING, *
+  ~  *                   LICENSE and WARRANTY file.                            *
+  ~  * email           : info at matsim dot org                                *
+  ~  *                                                                         *
+  ~  * *********************************************************************** *
+  ~  *                                                                         *
+  ~  *   This program is free software; you can redistribute it and/or modify  *
+  ~  *   it under the terms of the GNU General Public License as published by  *
+  ~  *   the Free Software Foundation; either version 2 of the License, or     *
+  ~  *   (at your option) any later version.                                   *
+  ~  *   See also COPYING, LICENSE and WARRANTY file                           *
+  ~  *                                                                         *
+  ~  * *********************************************************************** */
+  -->
+
+<!DOCTYPE config SYSTEM "http://www.matsim.org/files/dtd/config_v2.dtd">
+<!-- This is a fairly minimal config file; see console or logfile output for more options. -->
+<config>
+
+	<module name="network">
+		<param name="inputNetworkFile" value="testNetwork_singleTrack.xml" />
+	</module>
+
+	<module name="plans">
+		<param name="inputPlansFile" value="testPlan_singleTrack.xml" />
+	</module>
+
+	<module name="controler">
+		<param name="outputDirectory" value="./output_singleTrack" />
+		<param name="firstIteration" value="0" />
+		<param name="lastIteration" value="20" />
+		<param name="mobsim" value="qsim" />
+		<param name="eventsFileFormat" value="xml" />
+	</module>
+
+
+	<module name="qsim">
+	    <param name= "usePersonIdForMissingVehicleId" value= " true " />
+	    <param name="vehiclesSource" value="fromVehiclesData" />
+		<param name="mainMode" value="car" />
+		<param name="startTime" value="00:00:00" />
+		<param name="endTime" value="0:15:00" />
+
+	</module>
+
+
+	<module name="planCalcScore" >
+		
+		<parameterset type="scoringParameters">
+			<param name="lateArrival" value="-0" />
+			<param name="earlyDeparture" value="-0" />
+			<param name="marginalUtilityOfMoney" value="0.015" />
+		
+		<parameterset type="modeParams">
+			<param name="mode" value="car" />
+			<param name="constant" value="0.0" />
+			<param name="marginalUtilityOfDistance_util_m" value="0.0" />
+			<param name="marginalUtilityOfTraveling_util_hr" value="-0.84" />
+			<param name="monetaryDistanceRate" value="-0.00042667" /> <!-- 18.5 SEK/mil = 0.00185 SEK/m -->
+		</parameterset>
+		
+		
+		<parameterset type="modeParams" >
+			<param name="marginalUtilityOfTraveling_util_hr" value="-1" />
+			<param name="mode" value="pt" />
+		</parameterset>
+	
+			
+		<parameterset type="activityParams">
+			<param name="activityType"    value="home" /> <!-- home -->
+			<param name="typicalDuration" value="12:00:00" />
+		</parameterset>
+		
+		<parameterset type="activityParams">
+			<param name="activityType"     value="work" /> <!-- work -->
+			<param name="typicalDuration" value="08:00:00" />
+		</parameterset>
+		</parameterset>
+	</module>
+
+    <module name="planscalcroute" >
+		<param name="networkModes" value="car" />
+	</module>
+
+	<module name="vehicles" >
+		<param name="vehiclesFile" value="mode-vehicles.xml" /> 
+	</module>
+	
+    <module name="TimeAllocationMutator" >
+        <param name="mutationRange" value="1.0" />
+    </module>
+
+	<module name="strategy">
+		<param name="maxAgentPlanMemorySize" value="1" /> <!-- 0 means unlimited -->
+		<param name="planSelectorForRemoval" value="WorstPlanSelector" />
+
+		<parameterset type="strategysettings">
+			<param name="strategyName" value="ChangeExpBeta"/>
+			<param name="weight" value="1"/>
+		</parameterset>
+
+		<parameterset type="strategysettings">
+			<param name="strategyName" value="ReRoute"/>
+			<param name="weight" value="1"/>
+		</parameterset>
+
+		<parameterset type="strategysettings">
+			<param name="strategyName" value="TimeAllocationMutator_ReRoute"/>
+			<param name="weight" value="1"/>
+		</parameterset>
+		
+	</module>
+
+
+</config>
