@@ -38,7 +38,7 @@ public class runTestScenario_doubleSingleTrack_2Routes_SingleToClose_SpeedChange
 		String planFile = inputDataPath+"testPlan_doubleSingleTrack_TrainType_2.xml";
 		String networkFile = inputDataPath+"testNetwork_singleTrack_2Routes_SingleToClose_TrainType_2.xml";
 		String vehicleFile = inputDataPath+"trainType_2.xml";
-		String outputDirectory = inputDataPath+"output_doubleSingleTrack_2Routes_SingleToClose_SpeedChange_TrainType_2";
+		String outputDirectory = inputDataPath+"output_doubleSingleTrack_2Routes_SingleToClose_TrainType_2";
 		
 		Config config = ConfigUtils.loadConfig( configFile ) ;
 		config.network().setInputFile(networkFile);
@@ -79,22 +79,22 @@ public class runTestScenario_doubleSingleTrack_2Routes_SingleToClose_SpeedChange
 			VehicleUtils.insertVehicleIdsIntoAttributes(person.getValue(), modeToVehicle);
 		}
 		
-		// speed change events
-		Id<Link> l_6_AB = Id.createLinkId("l_6_AB");
-		Id<Link> l_6_BA = Id.createLinkId("l_6_BA");
-		Link link_l_6_AB = nt.getLinks().get(l_6_AB  ) ;
-		Link link_l_6_BA = nt.getLinks().get(l_6_BA  ) ;
-		NetworkChangeEvent networkChangeEvent3 = new NetworkChangeEvent(8*60*60+60) ;
-		networkChangeEvent3.setFreespeedChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  5 ));
-		networkChangeEvent3.addLink(link_l_6_AB);
-		networkChangeEvent3.addLink(link_l_6_BA);
-		NetworkUtils.addNetworkChangeEvent(nt,networkChangeEvent3);
-		
-		NetworkChangeEvent networkChangeEvent4 = new NetworkChangeEvent(8*60*60+90) ;
-		networkChangeEvent4.setFreespeedChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  25 ));
-		networkChangeEvent4.addLink(link_l_6_AB);
-		networkChangeEvent4.addLink(link_l_6_BA);
-		NetworkUtils.addNetworkChangeEvent(nt,networkChangeEvent4);
+//		// speed change events
+//		Id<Link> l_6_AB = Id.createLinkId("l_6_AB");
+//		Id<Link> l_6_BA = Id.createLinkId("l_6_BA");
+//		Link link_l_6_AB = nt.getLinks().get(l_6_AB  ) ;
+//		Link link_l_6_BA = nt.getLinks().get(l_6_BA  ) ;
+//		NetworkChangeEvent networkChangeEvent3 = new NetworkChangeEvent(8*60*60+60) ;
+//		networkChangeEvent3.setFreespeedChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  5 ));
+//		networkChangeEvent3.addLink(link_l_6_AB);
+//		networkChangeEvent3.addLink(link_l_6_BA);
+//		NetworkUtils.addNetworkChangeEvent(nt,networkChangeEvent3);
+//		
+//		NetworkChangeEvent networkChangeEvent4 = new NetworkChangeEvent(8*60*60+90) ;
+//		networkChangeEvent4.setFreespeedChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  25 ));
+//		networkChangeEvent4.addLink(link_l_6_AB);
+//		networkChangeEvent4.addLink(link_l_6_BA);
+//		NetworkUtils.addNetworkChangeEvent(nt,networkChangeEvent4);
 		
 		// add the events handlers
 		Controler controler = new Controler( scenario ) ;

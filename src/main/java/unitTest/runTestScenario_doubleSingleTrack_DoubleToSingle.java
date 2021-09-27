@@ -35,7 +35,8 @@ public class runTestScenario_doubleSingleTrack_DoubleToSingle {
 		config.network().setTimeVariantNetwork(true);
 		config.controler().setOutputDirectory(outputDirectory);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setLastIteration(1);
+		config.controler().setLastIteration(2);
+		config.controler().setWriteEventsInterval(1);
 		config.plans().setInputFile(planFile);
 		
 		config.qsim().setStartTime(0*60*60);
@@ -51,13 +52,13 @@ public class runTestScenario_doubleSingleTrack_DoubleToSingle {
 		
 		Id<Link> linkId = Id.createLinkId("q_l_3_AB");
 		Link linkToClose = nt.getLinks().get(linkId  ) ;
-		NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(8*60*60+60) ;
+		NetworkChangeEvent networkChangeEvent = new NetworkChangeEvent(8*60*60+120) ;
 		networkChangeEvent.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  0 ));
 		networkChangeEvent.addLink(linkToClose);
 		NetworkUtils.addNetworkChangeEvent(nt,networkChangeEvent);
 		
 
-		NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(8*60*60+180) ;
+		NetworkChangeEvent networkChangeEvent2 = new NetworkChangeEvent(8*60*60+300) ;
 		networkChangeEvent2.setFlowCapacityChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  60 ));
 		networkChangeEvent2.addLink(linkToClose);
 		NetworkUtils.addNetworkChangeEvent(nt,networkChangeEvent2);

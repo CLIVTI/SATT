@@ -45,8 +45,8 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 	private int TPAEventsPosition=0;
 	private PriorityQueue<NetworkChangeEvent> networkChangeEventQueue = new PriorityQueue<NetworkChangeEvent>(1, new Comparator<NetworkChangeEvent>() {
 
-		@Override
-		public int compare(NetworkChangeEvent o1, NetworkChangeEvent o2) {
+	@Override
+	public int compare(NetworkChangeEvent o1, NetworkChangeEvent o2) {
 			Double o1Double = o1.getStartTime();
 			Double o2Double = o2.getStartTime();
 			return o1Double.compareTo(o2Double);
@@ -154,7 +154,7 @@ public class SingleTrackListener implements MobsimInitializedListener,BeforeMobs
 		double now = e.getSimulationTime();
 		QSim qSim=(QSim) e.getQueueSimulation();
 
-        // first add single track related networkChangeEvent into the ArrayList toBeImplementedNetworkChangeEvents
+		// first add single track related networkChangeEvent into the ArrayList toBeImplementedNetworkChangeEvents
 		double initialTime=Double.NEGATIVE_INFINITY;
 		ArrayList<NetworkChangeEvent> toBeImplementedNetworkChangeEvents= new ArrayList<NetworkChangeEvent>();
 		while (initialTime<=now & networkChangeEventQueue.size()>0) {

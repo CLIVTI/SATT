@@ -20,9 +20,7 @@ import eventsHandling.SingleTrackListener;
 public class runTestScenario_doubleSingleTrack_2Routes_SingleToClose {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 
-		// TODO Auto-generated method stub
 		String inputDataPath = System.getProperty("user.dir")+"\\src\\main\\resources\\testData\\";
 		inputDataPath = inputDataPath.replaceAll("\\\\", "/");
 		String configFile = inputDataPath+"config-DTA_complicatedSingleTrack_2Routes.xml";

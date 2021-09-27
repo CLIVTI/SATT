@@ -36,7 +36,7 @@
 	<module name="controler">
 		<param name="outputDirectory" value="./output_singleTrack" />
 		<param name="firstIteration" value="0" />
-		<param name="lastIteration" value="20" />
+		<param name="lastIteration" value="30" />
 		<param name="mobsim" value="qsim" />
 		<param name="eventsFileFormat" value="xml" />
 	</module>

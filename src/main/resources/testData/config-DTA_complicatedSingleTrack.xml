@@ -36,7 +36,8 @@
 	<module name="controler">
 		<param name="outputDirectory" value="./output_singleTrack" />
 		<param name="firstIteration" value="0" />
-		<param name="lastIteration" value="2" />
+		<param name="lastIteration" value="20" />
+		<param name="mobsim" value="qsim" />
 		<param name="eventsFileFormat" value="xml" />
 	</module>
 
@@ -44,6 +45,7 @@
 	<module name="qsim">
 		<param name="startTime" value="00:00:00" />
 		<param name="endTime" value="0:15:00" />
+		<param name="mainMode" value="car" />
 
 	</module>
 
